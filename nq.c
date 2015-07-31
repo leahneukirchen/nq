@@ -107,6 +107,8 @@ main(int argc, char *argv[])
 		/* output expected lockfile name.  */
 		sprintf(lockfile, ",%011lx.%d", ms, child);
 		dprintf(1, "%s\n", lockfile);
+		close(0);
+		close(1);
 
 		/* signal parent to exit.  */
 		close(pipefd[1]);
