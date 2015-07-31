@@ -1,0 +1,17 @@
+#!/bin/sh
+# tq CMD... - tmux wrapper for nq to display output in new window
+
+set -e
+
+s=$(nq "$@")
+p=${s##*.}
+
+printf '%s\n' "$s"
+
+if [ -n "$p" ] && [ -n "$TMUX" ]; then
+        tmux new-window -a -d -n '<' -c '#{pane_current_path}' \
+                "trap true INT QUIT TERM EXIT;
+                 tail -F --pid=$p $s || kill $p;
+                 printf '[%d exited, ^D to exit.]\n' $p;
+                 cat >/dev/null"
+fi
