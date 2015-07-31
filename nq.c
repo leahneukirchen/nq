@@ -1,9 +1,10 @@
 /*
- * nq CMD... - run CMD... in background and in order, saving output to ,* files
+ * nq [-w] CMD... - run CMD... in background and in order, saving output
+ * -w  wait for all jobs queued so far to finish
  *
  * - requires POSIX.1-2008
  * - enforcing order works like this:
- *   - every job has a flock(2)ed file ala ",TIMESTAMP.PID"
+ *   - every job has a flock(2)ed output file ala ",TIMESTAMP.PID"
  *   - every job starts only after all earlier flock(2)ed files finished
  *   - the lock is released when job terminates
  *   - no sub-second file system time stamps are required, jobs are started
@@ -69,19 +70,32 @@ write_execline(int fd, int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-	int dirfd, lockfd;
+	int dirfd = 0, lockfd = 0, opt = 0, wflag = 0;
 	int pipefd[2];
 	char lockfile[32];
 	pid_t child;
 	struct timeval started;
 	struct dirent *ent;
+	DIR *dir;
 
 	/* timestamp is milliseconds since epoch.  */
 	gettimeofday(&started, NULL);
 	int64_t ms = started.tv_sec*1000 + started.tv_usec/1000;
 
+	while ((opt = getopt(argc, argv, "+hw")) != -1) {
+		switch (opt) {
+		case 'w':
+			wflag = 1;
+			break;
+		case 'h':
+		default:
+			goto usage;
+		}
+	}
+
 	if (argc <= 1) {
-		swrite(2, "usage: nq CMD...\n");
+usage:
+		swrite(2, "usage: nq [-w] CMD...\n");
 		exit(1);
 	}
 
@@ -93,6 +107,11 @@ main(int argc, char *argv[])
 	if (dirfd < 0) {
 		perror("dir open");
 		exit(111);
+	}
+
+	if (wflag) {
+		sprintf(lockfile, ".,%011lx.%d", ms, getpid());
+		goto wait;
 	}
 
 	pipe(pipefd);
@@ -173,7 +192,8 @@ main(int argc, char *argv[])
 
 	write_execline(lockfd, argc, argv);
 
-	DIR *dir = fdopendir(dirfd);
+wait:
+	dir = fdopendir(dirfd);
 	if (!dir) {
 		perror("fdopendir");
 		exit(111);
@@ -204,6 +224,9 @@ again:
 	}
 
 	closedir(dir);		/* closes dirfd too.  */
+
+	if (wflag)
+		return 0;
 
 	/* ready to run.  */
 
