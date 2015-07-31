@@ -183,19 +183,23 @@ again:
 	while ((ent = readdir(dir))) {
 		if (ent->d_name[0] == ',' &&
 		    strcmp(ent->d_name, lockfile+1) < 0) {
-			int f = openat(dirfd, ent->d_name, O_RDWR);
-    
-			if (flock(f, LOCK_EX | LOCK_NB) == -1 &&
-			    errno == EWOULDBLOCK) {
-				flock(f, LOCK_EX);   /* sit it out.  */
+			int fd;
 
-				close(f);
+			fd = openat(dirfd, ent->d_name, O_RDWR);
+			if (fd < 0)
+				continue;
+    
+			if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
+			    errno == EWOULDBLOCK) {
+				flock(fd, LOCK_EX);   /* sit it out.  */
+
+				close(fd);
 				rewinddir(dir);
 				goto again;
 			}
     
-			fchmod(f, 0600);
-			close(f);
+			fchmod(fd, 0600);
+			close(fd);
 		}
 	}
 
