@@ -54,16 +54,21 @@ write_execline(int fd, int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-	pid_t child;
 	int dirfd, lockfd;
-	char lockfile[32];
 	int pipefd[2];
-	struct timeval tv;
+	char lockfile[32];
+	pid_t child;
+	struct timeval started;
 	struct dirent *ent;
 
 	/* timestamp is milliseconds since epoch.  */
-	gettimeofday(&tv, NULL);
-	int64_t ms = tv.tv_sec*1000 + tv.tv_usec/1000;
+	gettimeofday(&started, NULL);
+	int64_t ms = started.tv_sec*1000 + started.tv_usec/1000;
+
+	if (argc <= 1) {
+		swrite(2, "usage: nq CMD...\n");
+		exit(1);
+	}
 
 	char *path = getenv("NQDIR");
 	if (!path)
