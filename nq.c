@@ -1,6 +1,8 @@
 /*
-##% gcc -Wall -g -o $STEM $FILE
+##% gcc -std=c89 -Wall -g -o $STEM $FILE
 */
+
+#define _POSIX_C_SOURCE 200809L
 
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -12,6 +14,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -20,9 +23,31 @@
 void
 swrite(int fd, char *str)
 {
-	if (write(fd, str, strlen(str)) < 0) {
+	size_t l = strlen(str);
+
+	if (write(fd, str, l) != l) {
 		perror("write");
 		exit(222);
+	}
+}
+
+void
+write_execline(int fd, int argc, char *argv[])
+{
+	int i;
+	char *s;
+
+	swrite(fd, "exec");
+
+	for (i = 0; i < argc; i++) {
+		swrite(fd, " '");
+		for (s = argv[i]; *s; s++) {
+			if (*s == '\'')
+				swrite(fd, "'\\''");
+			else
+				write(fd, s, 1);
+		}
+		swrite(fd, "'");
 	}
 }
 
@@ -30,13 +55,15 @@ int
 main(int argc, char *argv[])
 {
 	pid_t child;
-	int lockfd, dirfd;
+	int dirfd, lockfd;
 	char lockfile[32];
 	int pipefd[2];
-
 	struct timeval tv;
+	struct dirent *ent;
+
+	/* timestamp is milliseconds since epoch.  */
 	gettimeofday(&tv, NULL);
-	int64_t ms = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+	int64_t ms = tv.tv_sec*1000 + tv.tv_usec/1000;
 
 	char *path = getenv("NQDIR");
 	if (!path)
@@ -50,21 +77,25 @@ main(int argc, char *argv[])
 
 	pipe(pipefd);
 
+	/* first fork, parent exits to run in background.  */
 	child = fork();
 	if (child == -1) {
 		perror("fork");
 		exit(111);
 	}
 	else if (child > 0) {
-		// background
-		close(pipefd[1]);
 		char c;
+
+		/* wait until child has backgrounded.  */
+		close(pipefd[1]);
 		read(pipefd[0], &c, 1);
+
 		exit(0);
 	}
 
 	close(pipefd[0]);
 
+	/* second fork, child later execs the job, parent collects status.  */
 	child = fork();
 	if (child == -1) {
 		perror("fork");
@@ -72,11 +103,12 @@ main(int argc, char *argv[])
 	}
 	else if (child > 0) {
 		int status;
-		sprintf(lockfile, ",%lx.%d", ms, child);
 
+		/* output expected lockfile name.  */
+		sprintf(lockfile, ",%011lx.%d", ms, child);
 		dprintf(1, "%s\n", lockfile);
 
-		// signal parent to exit
+		/* signal parent to exit.  */
 		close(pipefd[1]);
 
 		wait(&status);
@@ -100,40 +132,30 @@ main(int argc, char *argv[])
 
 	close(pipefd[1]);
 
-	sprintf(lockfile, ".,%lx.%d", ms, getpid());
-	lockfd = openat(dirfd, lockfile, O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
-  
+	/* create and lock lockfile.  since this cannot be done in one step,
+	   use a different filename first.  */
+	sprintf(lockfile, ".,%011lx.%d", ms, getpid());
+	lockfd = openat(dirfd, lockfile,
+	    O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
 	if (lockfd < 0) {
 		perror("open");
 		exit(222);
 	}
-
-	flock(lockfd, LOCK_EX);
+	if (flock(lockfd, LOCK_EX) < 0) {
+		perror("flock");
+		exit(222);
+	}
   
-	// drop leading '.'
+	/* drop leading '.' */
 	renameat(dirfd, lockfile, dirfd, lockfile+1);
 
-	swrite(lockfd, "exec");
-	int i;
-	for (i = 0; i < argc; i++) {
-		int j, l = strlen(argv[i]);
-		swrite(lockfd, " '");
-		for (j = 0; j < l; j++) {
-			if (argv[i][j] == '\'')
-				swrite(lockfd, "'\\''");
-			else
-				write(lockfd, argv[i]+j, 1);
-		}
-		swrite(lockfd, "'");
-	}
+	write_execline(lockfd, argc, argv);
 
 	DIR *dir = fdopendir(dirfd);
 	if (!dir) {
 		perror("fdopendir");
 		exit(111);
 	}
-
-	struct dirent *ent;
 
 again:
 	while ((ent = readdir(dir))) {
@@ -143,8 +165,9 @@ again:
     
 			if (flock(f, LOCK_EX | LOCK_NB) == -1 &&
 			    errno == EWOULDBLOCK) {
-				flock(f, LOCK_EX);   // sit it out
+				flock(f, LOCK_EX);   /* sit it out.  */
 
+				close(f);
 				rewinddir(dir);
 				goto again;
 			}
@@ -154,20 +177,19 @@ again:
 		}
 	}
 
-	closedir(dir);
+	closedir(dir);		/* closes dirfd too.  */
 
-	// ready to run
+	/* ready to run.  */
 
-	write(lockfd, "\n", 1);
-
+	swrite(lockfd, "\n\n");
 	fchmod(lockfd, 0700);
   
 	dup2(lockfd, 2);
 	dup2(lockfd, 1);
 	close(lockfd);
-	close(dirfd);
 
 	execvp(argv[1], argv+1);
 
-	return 111;
+	perror("execvp");
+	return 222;
 }
