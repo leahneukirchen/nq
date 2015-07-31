@@ -1,7 +1,7 @@
 #!/bin/sh
 # nq CMD... - run CMD... in background and in order, saving output to ,* files
 #
-# - needs POSIX sh + util-linux flock(1)
+# - needs POSIX sh + util-linux flock(1) (see nq.c for portable version)
 # - when run from tmux, display output in a new window (needs
 #   GNU tail, C-c to abort the job.)
 # - we try hard to make the currently running ,* file have +x bit
