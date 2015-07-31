@@ -1,5 +1,5 @@
 /*
-  ##% gcc -Wall -g -o $STEM $FILE
+##% gcc -Wall -g -o $STEM $FILE
 */
 
 #include <sys/file.h>
@@ -17,39 +17,22 @@
 #include <time.h>
 #include <unistd.h>
 
-static void
-quit(int sig)
+void
+swrite(int fd, char *str)
 {
-	exit(0);
+	if (write(fd, str, strlen(str)) < 0) {
+		perror("write");
+		exit(222);
+	}
 }
-
-/*
-  char *
-  timestamp() {
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  static char buf[10];
-
-  int64_t ms = tv.tv_sec * 1000 + tv.tv_usec / 1000;
-
-  buf[9] = 0;
-  int i;
-  for (i = 8; i >= 0; i--) {
-  buf[i] = 'a' + (ms % 26);
-  ms /= 26;
-  }
-  
-  return buf;
-  }
-*/
 
 int
 main(int argc, char *argv[])
 {
 	pid_t child;
-	int lockfd;
-	char lockfile[128];
-	int dirfd;
+	int lockfd, dirfd;
+	char lockfile[32];
+	int pipefd[2];
 
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -65,44 +48,57 @@ main(int argc, char *argv[])
 		exit(111);
 	}
 
+	pipe(pipefd);
+
 	child = fork();
 	if (child == -1) {
 		perror("fork");
 		exit(111);
 	}
-
-	if (child > 0) {
+	else if (child > 0) {
 		// background
-		signal(SIGINT, quit);
-		pause();
+		close(pipefd[1]);
+		char c;
+		read(pipefd[0], &c, 1);
 		exit(0);
 	}
 
+	close(pipefd[0]);
+
 	child = fork();
 	if (child == -1) {
 		perror("fork");
 		exit(111);
 	}
-	if (child > 0) {
+	else if (child > 0) {
 		int status;
 		sprintf(lockfile, ",%lx.%d", ms, child);
 
-		puts(lockfile);
+		dprintf(1, "%s\n", lockfile);
 
 		// signal parent to exit
-		kill(getppid(), SIGINT);
+		close(pipefd[1]);
 
 		wait(&status);
-		int fd;
-		fd = openat(dirfd, lockfile, O_RDWR | O_APPEND);
-		fchmod(fd, 0600);
+
+		lockfd = openat(dirfd, lockfile, O_RDWR | O_APPEND);
+		if (lockfd < 0) {
+			perror("open");
+			exit(222);
+		}
+
+		fchmod(lockfd, 0600);
 		if (WIFEXITED(status))
-			dprintf(fd, "\n[exited with status %d.]\n", WEXITSTATUS(status));
+			dprintf(lockfd, "\n[exited with status %d.]\n",
+			    WEXITSTATUS(status));
 		else
-			dprintf(fd, "\n[killed by signal %d.]\n", WTERMSIG(status));
+			dprintf(lockfd, "\n[killed by signal %d.]\n",
+			    WTERMSIG(status));
 
 		exit(0);
 	}
+
+	close(pipefd[1]);
 
 	sprintf(lockfile, ".,%lx.%d", ms, getpid());
 	lockfd = openat(dirfd, lockfile, O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
@@ -114,21 +110,21 @@ main(int argc, char *argv[])
 
 	flock(lockfd, LOCK_EX);
   
-	// drop leading .
+	// drop leading '.'
 	renameat(dirfd, lockfile, dirfd, lockfile+1);
 
-	write(lockfd, "exec", 4);
+	swrite(lockfd, "exec");
 	int i;
 	for (i = 0; i < argc; i++) {
 		int j, l = strlen(argv[i]);
-		write(lockfd, " '", 2);
+		swrite(lockfd, " '");
 		for (j = 0; j < l; j++) {
 			if (argv[i][j] == '\'')
-				write(lockfd, "'\\''", 4);
+				swrite(lockfd, "'\\''");
 			else
 				write(lockfd, argv[i]+j, 1);
 		}
-		write(lockfd, "'", 1);
+		swrite(lockfd, "'");
 	}
 
 	DIR *dir = fdopendir(dirfd);
@@ -141,10 +137,12 @@ main(int argc, char *argv[])
 
 again:
 	while ((ent = readdir(dir))) {
-		if (ent->d_name[0] == ',' && strcmp(ent->d_name, lockfile+1) < 0) {
+		if (ent->d_name[0] == ',' &&
+		    strcmp(ent->d_name, lockfile+1) < 0) {
 			int f = openat(dirfd, ent->d_name, O_RDWR);
     
-			if (flock(f, LOCK_EX | LOCK_NB) == -1 && errno == EWOULDBLOCK) {
+			if (flock(f, LOCK_EX | LOCK_NB) == -1 &&
+			    errno == EWOULDBLOCK) {
 				flock(f, LOCK_EX);   // sit it out
 
 				rewinddir(dir);
