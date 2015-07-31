@@ -1,5 +1,19 @@
 /*
-##% gcc -std=c89 -Wall -g -o $STEM $FILE
+ * nq CMD... - run CMD... in background and in order, saving output to ,* files
+ *
+ * - requires POSIX.1-2008
+ * - enforcing order works like this:
+ *   - every job has a flock(2)ed file ala ",TIMESTAMP.PID"
+ *   - every job starts only after all earlier flock(2)ed files finished
+ *   - the lock is released when job terminates
+ *   - no sub-second file system time stamps are required, jobs are started with
+ *     millisecond precision
+ * - we try hard to make the currently running ,* file have +x bit
+ * - you can re-queue jobs using "sh ,jobid"
+ *
+ * To the extent possible under law, Christian Neukirchen, chneukirchen@gmail.com
+ * has waived all copyright and related or neighboring rights to this work.
+ * http://creativecommons.org/publicdomain/zero/1.0/
 */
 
 #define _POSIX_C_SOURCE 200809L
