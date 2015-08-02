@@ -1,5 +1,5 @@
 /*
- * nq [-w | CMD...] - run CMD... in background and in order, saving output
+ * nq [-w ... | CMD...] - run CMD... in background and in order, saving output
  * -w  wait for all jobs queued so far to finish
  *
  * - requires POSIX.1-2008
@@ -93,9 +93,9 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if (argc <= 1 || (wflag && argc != 2)) {
+	if (argc <= 1) {
 usage:
-		swrite(2, "usage: nq [-w | CMD...]\n");
+		swrite(2, "usage: nq [-w ... | CMD...]\n");
 		exit(1);
 	}
 
@@ -186,44 +186,70 @@ usage:
 		perror("flock");
 		exit(222);
 	}
-  
+
 	/* drop leading '.' */
 	renameat(dirfd, lockfile, dirfd, lockfile+1);
 
 	write_execline(lockfd, argc, argv);
 
 wait:
-	dir = fdopendir(dirfd);
-	if (!dir) {
-		perror("fdopendir");
-		exit(111);
-	}
+	if (wflag && argc - optind > 0) {
+		/* wait for files passed as command line arguments.  */
 
-again:
-	while ((ent = readdir(dir))) {
-		if (ent->d_name[0] == ',' &&
-		    strcmp(ent->d_name, lockfile+1) < 0) {
+		int i;
+		for (i = optind; i < argc; i++) {
 			int fd;
 
-			fd = openat(dirfd, ent->d_name, O_RDWR);
+			if (strchr(argv[i], '/'))
+				fd = open(argv[i], O_RDWR);
+			else
+				fd = openat(dirfd, argv[i], O_RDWR);
 			if (fd < 0)
 				continue;
-    
+
 			if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
 			    errno == EWOULDBLOCK) {
 				flock(fd, LOCK_EX);   /* sit it out.  */
-
-				close(fd);
-				rewinddir(dir);
-				goto again;
 			}
-    
+
 			fchmod(fd, 0600);
 			close(fd);
 		}
-	}
+	} else {
+again:
+		dir = fdopendir(dirfd);
+		if (!dir) {
+			perror("fdopendir");
+			exit(111);
+		}
 
-	closedir(dir);		/* closes dirfd too.  */
+		while ((ent = readdir(dir))) {
+			/* wait for all ,* files.  */
+
+			if (ent->d_name[0] == ',' &&
+			    strcmp(ent->d_name, lockfile+1) < 0) {
+				int fd;
+
+				fd = openat(dirfd, ent->d_name, O_RDWR);
+				if (fd < 0)
+					continue;
+
+				if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
+				    errno == EWOULDBLOCK) {
+					flock(fd, LOCK_EX);   /* sit it out.  */
+
+					close(fd);
+					rewinddir(dir);
+					goto again;
+				}
+
+				fchmod(fd, 0600);
+				close(fd);
+			}
+		}
+
+		closedir(dir);		/* closes dirfd too.  */
+	}
 
 	if (wflag)
 		return 0;
@@ -232,7 +258,7 @@ again:
 
 	swrite(lockfd, "\n\n");
 	fchmod(lockfd, 0700);
-  
+
 	dup2(lockfd, 2);
 	dup2(lockfd, 1);
 	close(lockfd);
