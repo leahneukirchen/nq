@@ -1,0 +1,11 @@
+#!/bin/sh
+# fq - tail -f the queue outputs, quitting when the job finishes
+
+for f in ${NQDIR:-.}/,*; do
+	if ! nq -t $f; then
+		printf '==> %s\n' "$f"
+		tail -F $f & p=$!
+		nq -w $f
+		kill $p
+	fi
+done
