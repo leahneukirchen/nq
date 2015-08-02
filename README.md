@@ -32,7 +32,7 @@ STDOUT and STDERR are redirected into the log file.
 currently running job has +x bit set.  Thus you can use `ls -F` to get
 a quick overview of the state of your queue.
 
-The "file extension" of the log file is the actualy PID, so you can
+The "file extension" of the log file is the actually PID, so you can
 kill jobs easily.  Before the job is started, it is the PID of `nq`,
 so you can cancel a queued job by killing it as well.
 
@@ -43,12 +43,12 @@ You can wait for jobs to finish using `nq -w`, possibly listing job
 ids you want to wait for; the default is all of them.  Likewise, you
 can test if there are jobs which need to be waited upon using `-t`.
 
-By default, job ids are per-directoy, but you can set `$NQDIR` to put
+By default, job ids are per-directory, but you can set `$NQDIR` to put
 them elsewhere.  Creating `nq` wrappers setting `$NQDIR` to provide
 different queues for different purposes is encouraged.
 
 All these operations take worst-case linear time in the amount of lock
-files produced, so you should clean them regularily.
+files produced, so you should clean them regularly.
 
 ## nq helpers
 
@@ -62,7 +62,7 @@ jobs are done.
 
 (A pure shell implementation of `nq` is provided as `nq.sh`.  It needs
 `flock` from util-linux, and only has a timer resolution of 1s.
-Lockfiles from `nq` and `nq.sh` should not be mixed.)
+Lock files from `nq` and `nq.sh` should not be mixed.)
 
 ## Copyright
 
