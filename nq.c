@@ -1,6 +1,7 @@
 /*
- * nq [-w ... | CMD...] - run CMD... in background and in order, saving output
- * -w  wait for all jobs queued so far to finish
+ * nq CMD... - run CMD... in background and in order, saving output
+ * -w ...  wait for all jobs/listed jobs queued so far to finish
+ * -t ...  exit 0 if no (listed) job needs waiting
  *
  * - requires POSIX.1-2008
  * - enforcing order works like this:
@@ -70,7 +71,7 @@ write_execline(int fd, int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-	int dirfd = 0, lockfd = 0, opt = 0, wflag = 0;
+	int dirfd = 0, lockfd = 0, opt = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
 	char lockfile[32];
 	pid_t child;
@@ -82,10 +83,13 @@ main(int argc, char *argv[])
 	gettimeofday(&started, NULL);
 	int64_t ms = started.tv_sec*1000 + started.tv_usec/1000;
 
-	while ((opt = getopt(argc, argv, "+hw")) != -1) {
+	while ((opt = getopt(argc, argv, "+htw")) != -1) {
 		switch (opt) {
 		case 'w':
 			wflag = 1;
+			break;
+		case 't':
+			tflag = 1;
 			break;
 		case 'h':
 		default:
@@ -95,7 +99,7 @@ main(int argc, char *argv[])
 
 	if (argc <= 1) {
 usage:
-		swrite(2, "usage: nq [-w ... | CMD...]\n");
+		swrite(2, "usage: nq [-w ... | -t ... | CMD...]\n");
 		exit(1);
 	}
 
@@ -109,7 +113,7 @@ usage:
 		exit(111);
 	}
 
-	if (wflag) {
+	if (tflag || wflag) {
 		sprintf(lockfile, ".,%011lx.%d", ms, getpid());
 		goto wait;
 	}
@@ -193,7 +197,7 @@ usage:
 	write_execline(lockfd, argc, argv);
 
 wait:
-	if (wflag && argc - optind > 0) {
+	if ((tflag || wflag) && argc - optind > 0) {
 		/* wait for files passed as command line arguments.  */
 
 		int i;
@@ -209,6 +213,8 @@ wait:
 
 			if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
 			    errno == EWOULDBLOCK) {
+				if (tflag)
+					exit(1);
 				flock(fd, LOCK_EX);   /* sit it out.  */
 			}
 
@@ -216,13 +222,13 @@ wait:
 			close(fd);
 		}
 	} else {
-again:
 		dir = fdopendir(dirfd);
 		if (!dir) {
 			perror("fdopendir");
 			exit(111);
 		}
 
+again:
 		while ((ent = readdir(dir))) {
 			/* wait for all ,* files.  */
 
@@ -236,6 +242,8 @@ again:
 
 				if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
 				    errno == EWOULDBLOCK) {
+					if (tflag)
+						exit(1);
 					flock(fd, LOCK_EX);   /* sit it out.  */
 
 					close(fd);
@@ -251,8 +259,8 @@ again:
 		closedir(dir);		/* closes dirfd too.  */
 	}
 
-	if (wflag)
-		return 0;
+	if (tflag || wflag)
+		exit(0);
 
 	/* ready to run.  */
 
