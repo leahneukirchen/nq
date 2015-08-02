@@ -271,6 +271,7 @@ again:
 	dup2(lockfd, 1);
 	close(lockfd);
 
+	setenv("NQJOBID", lockfile+1, 1);
 	execvp(argv[1], argv+1);
 
 	perror("execvp");
