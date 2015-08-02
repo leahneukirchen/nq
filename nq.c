@@ -1,5 +1,5 @@
 /*
- * nq [-w] CMD... - run CMD... in background and in order, saving output
+ * nq [-w | CMD...] - run CMD... in background and in order, saving output
  * -w  wait for all jobs queued so far to finish
  *
  * - requires POSIX.1-2008
@@ -93,9 +93,9 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if (argc <= 1) {
+	if (argc <= 1 || (wflag && argc != 2)) {
 usage:
-		swrite(2, "usage: nq [-w] CMD...\n");
+		swrite(2, "usage: nq [-w | CMD...]\n");
 		exit(1);
 	}
 
