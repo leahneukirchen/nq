@@ -47,8 +47,8 @@ By default, job ids are per-directory, but you can set `$NQDIR` to put
 them elsewhere.  Creating `nq` wrappers setting `$NQDIR` to provide
 different queues for different purposes is encouraged.
 
-All these operations take worst-case linear time in the amount of lock
-files produced, so you should clean them regularly.
+All these operations take worst-case quadratic time in the amount of
+lock files produced, so you should clean them regularly.
 
 ## nq helpers
 
