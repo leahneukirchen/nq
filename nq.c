@@ -155,6 +155,7 @@ usage:
 		dprintf(1, "%s\n", lockfile);
 		close(0);
 		close(1);
+		close(2);
 
 		/* signal parent to exit.  */
 		close(pipefd[1]);
@@ -198,6 +199,9 @@ usage:
 	renameat(dirfd, lockfile, dirfd, lockfile+1);
 
 	write_execline(lockfd, argc, argv);
+
+	dup2(lockfd, 2);
+	dup2(lockfd, 1);
 
 wait:
 	if ((tflag || wflag) && argc - optind > 0) {
@@ -270,8 +274,6 @@ again:
 	swrite(lockfd, "\n\n");
 	fchmod(lockfd, 0700);
 
-	dup2(lockfd, 2);
-	dup2(lockfd, 1);
 	close(lockfd);
 
 	setenv("NQJOBID", lockfile+1, 1);
