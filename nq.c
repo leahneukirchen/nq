@@ -3,7 +3,7 @@
  * -w ...  wait for all jobs/listed jobs queued so far to finish
  * -t ...  exit 0 if no (listed) job needs waiting
  *
- * - requires POSIX.1-2008
+ * - requires POSIX.1-2008 and having flock(2)
  * - enforcing order works like this:
  *   - every job has a flock(2)ed output file ala ",TIMESTAMP.PID"
  *   - every job starts only after all earlier flock(2)ed files finished
@@ -19,7 +19,8 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
 */
 
-#define _POSIX_C_SOURCE 200809L
+/* for FreeBSD.  */
+#define _WITH_DPRINTF
 
 #include <sys/file.h>
 #include <sys/stat.h>

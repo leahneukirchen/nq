@@ -4,8 +4,9 @@ These small utilities allow creating very lightweight job queue
 systems which require no setup, maintenance, supervision, or any
 long-running processes.
 
-`nq` should run on any POSIX.1-2008 compliant system using directories
-where flock(2) works.
+`nq` should run on any POSIX.1-2008 compliant system which also
+provides a working flock(2).  Tested on Linux 4.1, OpenBSD 5.7 and
+FreeBSD 10.1.
 
 The intended purpose is ad-hoc queuing of command lines (e.g. for
 building several targets of a Makefile, downloading multiple files one

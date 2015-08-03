@@ -1,4 +1,4 @@
-CFLAGS=-g -std=c89 -Wall -O2
+CFLAGS=-g -Wall -O2
 all: nq
 nq: nq.c
 clean:
