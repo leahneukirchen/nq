@@ -30,8 +30,9 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
+#include <inttypes.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -71,9 +72,10 @@ write_execline(int fd, int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
+	int64_t ms;
 	int dirfd = 0, lockfd = 0, opt = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
-	char lockfile[32];
+	char lockfile[64];
 	pid_t child;
 	struct timeval started;
 	struct dirent *ent;
@@ -81,7 +83,7 @@ main(int argc, char *argv[])
 
 	/* timestamp is milliseconds since epoch.  */
 	gettimeofday(&started, NULL);
-	int64_t ms = started.tv_sec*1000 + started.tv_usec/1000;
+	ms = started.tv_sec*1000 + started.tv_usec/1000;
 
 	while ((opt = getopt(argc, argv, "+htw")) != -1) {
 		switch (opt) {
@@ -114,7 +116,7 @@ usage:
 	}
 
 	if (tflag || wflag) {
-		sprintf(lockfile, ".,%011lx.%d", ms, getpid());
+		sprintf(lockfile, ".,%011" PRIx64 ".%d", ms, getpid());
 		goto wait;
 	}
 
@@ -148,7 +150,7 @@ usage:
 		int status;
 
 		/* output expected lockfile name.  */
-		sprintf(lockfile, ",%011lx.%d", ms, child);
+		sprintf(lockfile, ",%011" PRIx64 ".%d", ms, child);
 		dprintf(1, "%s\n", lockfile);
 		close(0);
 		close(1);
