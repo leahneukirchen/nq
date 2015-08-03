@@ -59,7 +59,8 @@ Two helper scripts are provided:
 `tmux` and GNU `tail`).
 
 `fq` outputs the log of the currently running jobs, exiting when the
-jobs are done.
+jobs are done.  If no job is running, the output of the last job is
+shown.
 
 (A pure shell implementation of `nq` is provided as `nq.sh`.  It needs
 `flock` from util-linux, and only has a timer resolution of 1s.
