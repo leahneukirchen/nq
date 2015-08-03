@@ -1,0 +1,78 @@
+#!/bin/sh
+
+: ${NQ:=../nq}
+
+set -e
+
+check() {
+  msg=$1
+  shift
+  if eval "$@" 2>/dev/null 1>&2; then
+    printf 'ok - %s\n' "$msg"
+  else
+    printf 'not ok - %s\n' "$msg"
+    false
+  fi
+  true
+}
+
+printf '1..26\n'
+
+rm -rf test.dir
+mkdir test.dir
+(
+cd test.dir
+
+check 'fails with no arguments' ! $NQ
+check 'succeeds enqueuing true' 'f=$($NQ true)'
+check 'generated a lockfile' test -f $f
+check 'lockfile contains exec line' grep -q exec.*nq.*true $f
+check 'lockfile contains status line' grep -q exited.*status.*0 $f
+check 'lockfile is not executable' ! test -x $f
+)
+
+rm -rf test.dir
+mkdir test.dir
+(
+cd test.dir
+
+check 'enqueing true' f1=$($NQ true)
+check 'enqueing sleep 500' f2=$($NQ sleep 500)
+check 'first job is done already' $NQ -t $f1
+check 'not all jobs are done already' ! $NQ -t
+check 'running job is executable' test -x $f2
+check 'running job not done already' ! $NQ -t $f
+check 'can kill running job' kill ${f2##*.}
+sleep 1
+check 'killed job is not executable anymore' ! test -x $f2
+check 'killed job contains status line' grep -q killed.*signal.*15 $f2
+)
+
+rm -rf test.dir
+mkdir test.dir
+(
+cd test.dir
+
+check 'enqueing env' f1=$($NQ env)
+$NQ -w
+check 'NQJOBID is set' grep -q NQJOBID=$f1 $f1
+)
+
+rm -rf test.dir
+mkdir test.dir
+(
+cd test.dir
+
+check 'spawning four jobs' 'f1=$($NQ sleep 100)'
+check 'spawning four jobs' 'f2=$($NQ sleep 1)'
+check 'spawning four jobs' 'f3=$($NQ sleep 100)'
+check 'spawning four jobs' 'f4=$($NQ sleep 1)'
+check 'killing first job' kill ${f1##*.}
+check 'killing third job' kill ${f3##*.}
+check 'second job is running' ! $NQ -t $f2
+$NQ -w $f2
+check 'fourth job is running' ! $NQ -t $f4
+check 'all jobs are done' $NQ -w
+)
+
+rm -rf test.dir

@@ -3,3 +3,5 @@ all: nq
 nq: nq.c
 clean:
 	rm -f nq
+check:
+	prove -v ./tests
