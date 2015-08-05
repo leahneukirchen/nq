@@ -1,6 +1,7 @@
 #!/bin/sh
 
 : ${NQ:=../nq}
+: ${FQ:=../fq}
 
 set -e
 
@@ -16,7 +17,7 @@ check() {
   true
 }
 
-printf '1..26\n'
+printf '1..36\n'
 
 rm -rf test.dir
 mkdir test.dir
@@ -73,6 +74,24 @@ check 'second job is running' ! $NQ -t $f2
 $NQ -w $f2
 check 'fourth job is running' ! $NQ -t $f4
 check 'all jobs are done' $NQ -w
+)
+
+rm -rf test.dir
+mkdir test.dir
+(
+cd test.dir
+
+check 'spawning four jobs' 'f1=$($NQ sleep 100)'
+check 'spawning four jobs' 'f2=$($NQ echo two)'
+check 'spawning four jobs' 'f3=$($NQ sleep 300)'
+check 'spawning four jobs' 'f4=$($NQ sleep 400)'
+check 'fq tracks first job' '($FQ & p=$!; sleep 1; kill $p) | sed 3q | grep -q sleep.*100'
+check 'killing first job' kill ${f1##*.}
+check 'killing fourth job' kill ${f4##*.}
+sleep 1
+check 'fq tracks third job' '($FQ & p=$!; sleep 1; kill $p) | sed 3q | grep -q sleep.*300'
+check 'killing third job' kill ${f3##*.}
+check 'fq outputs last job when no job running' '$FQ | sed 3q | grep -q sleep.*400'
 )
 
 rm -rf test.dir
