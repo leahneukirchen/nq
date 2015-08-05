@@ -17,6 +17,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#define DELAY 250000
+
 #ifdef __linux__
 #define USE_INOTIFY
 #endif
@@ -28,11 +30,24 @@ char ibuf[8192];
 
 char buf[8192];
 
-int main(int argc, char *argv[])
+int
+islocked(int fd)
+{
+	if (flock(fd, LOCK_EX|LOCK_NB) == -1) {
+		return (errno == EWOULDBLOCK);
+	} else {
+		flock(fd, LOCK_UN);
+		return 0;
+	}
+}
+
+int
+main(int argc, char *argv[])
 {
 	int i, fd;
 	off_t off, loff;
 	ssize_t rd;
+	int didsth = 0;
 
 #ifdef USE_INOTIFY
 	int ifd, wd;
@@ -40,7 +55,6 @@ int main(int argc, char *argv[])
 
 	if (argc < 2) {
 		/* little better than glob(3)... */
-                /* TODO: replace and enable rescanning of the dir... */
 		execl("/bin/sh", "sh", "-c", "fq ${NQDIR:+$NQDIR/},*", (char *) 0);
 		exit(111);
 	}
@@ -52,12 +66,22 @@ int main(int argc, char *argv[])
 #endif
 
 	for (i = 1; i < argc; i++) {
-		fd = open(argv[i], O_RDONLY);
 		loff = 0;
+
+		fd = open(argv[i], O_RDONLY);
+		if (fd < 0)
+			continue;
+
+		/* skip not running jobs, unless we did not output anything yet
+		 * and are at the last argument.  */
+		if (!islocked(fd) && (didsth || i != argc - 1))
+			continue;
 
 		write(1, "==> ", 4);
 		write(1, argv[i], strlen(argv[i]));
 		write(1, "\n", 1);
+
+		didsth = 1;
 
 #ifdef USE_INOTIFY
 		wd = inotify_add_watch(ifd, argv[i], IN_MODIFY|IN_CLOSE_WRITE);
@@ -78,7 +102,7 @@ int main(int argc, char *argv[])
 #else
 					/* poll for size change */
 					while (off == lseek(fd, 0, SEEK_END))
-						usleep(250000);
+						usleep(DELAY);
 #endif
 					continue;
 				} else {
