@@ -24,6 +24,7 @@ mkdir test.dir
 (
 cd test.dir
 
+printf '# nq tests\n'
 check 'fails with no arguments' ! $NQ
 check 'succeeds enqueuing true' 'f=$($NQ true)'
 check 'generated a lockfile' test -f $f
@@ -37,6 +38,7 @@ mkdir test.dir
 (
 cd test.dir
 
+printf '# queue tests\n'
 check 'enqueing true' f1=$($NQ true)
 check 'enqueing sleep 500' f2=$($NQ sleep 500)
 check 'first job is done already' $NQ -t $f1
@@ -54,6 +56,7 @@ mkdir test.dir
 (
 cd test.dir
 
+printf '# env tests\n'
 check 'enqueing env' f1=$($NQ env)
 $NQ -w
 check 'NQJOBID is set' grep -q NQJOBID=$f1 $f1
@@ -64,6 +67,7 @@ mkdir test.dir
 (
 cd test.dir
 
+printf '# killing tests\n'
 check 'spawning four jobs' 'f1=$($NQ sleep 100)'
 check 'spawning four jobs' 'f2=$($NQ sleep 1)'
 check 'spawning four jobs' 'f3=$($NQ sleep 100)'
@@ -81,17 +85,18 @@ mkdir test.dir
 (
 cd test.dir
 
+printf '# fq tests\n'
 check 'spawning four jobs' 'f1=$($NQ sleep 100)'
 check 'spawning four jobs' 'f2=$($NQ echo two)'
 check 'spawning four jobs' 'f3=$($NQ sleep 300)'
 check 'spawning four jobs' 'f4=$($NQ sleep 400)'
-check 'fq tracks first job' '($FQ & p=$!; sleep 1; kill $p) | sed 3q | grep -q sleep.*100'
+check 'fq tracks first job' '($FQ ,* & p=$!; sleep 1; kill $p) | sed 3q | grep -q sleep.*100'
 check 'killing first job' kill ${f1##*.}
 check 'killing fourth job' kill ${f4##*.}
 sleep 1
-check 'fq tracks third job' '($FQ & p=$!; sleep 1; kill $p) | sed 3q | grep -q sleep.*300'
+check 'fq tracks third job' '($FQ ,* & p=$!; sleep 1; kill $p) | sed 3q | grep -q sleep.*300'
 check 'killing third job' kill ${f3##*.}
-check 'fq outputs last job when no job running' '$FQ | sed 3q | grep -q sleep.*400'
+check 'fq outputs last job when no job running' '$FQ ,* | sed 3q | grep -q sleep.*400'
 )
 
 rm -rf test.dir
