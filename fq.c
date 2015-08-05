@@ -53,6 +53,8 @@ main(int argc, char *argv[])
 	int ifd, wd;
 #endif
 
+	close(0);
+
 	if (argc < 2) {
 		/* little better than glob(3)... */
 		execl("/bin/sh", "sh", "-c", "fq ${NQDIR:+$NQDIR/},*", (char *) 0);
