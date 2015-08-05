@@ -60,7 +60,9 @@ Two helper scripts are provided:
 
 `fq` outputs the log of the currently running jobs, exiting when the
 jobs are done.  If no job is running, the output of the last job is
-shown.
+shown.  `fq` uses `inotify` on Linux and falls back to polling for
+size change else.  `fq.sh` is a similar tool, not quite as robust,
+implemented as shell-script calling `tail`.
 
 (A pure shell implementation of `nq` is provided as `nq.sh`.  It needs
 `flock` from util-linux, and only has a timer resolution of 1s.
