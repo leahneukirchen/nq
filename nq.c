@@ -117,7 +117,8 @@ usage:
 	}
 
 	if (tflag || wflag) {
-		sprintf(lockfile, ".,%011" PRIx64 ".%d", ms, getpid());
+		snprintf(lockfile, sizeof lockfile,
+		    ".,%011" PRIx64 ".%d", ms, getpid());
 		goto wait;
 	}
 
@@ -151,7 +152,8 @@ usage:
 		int status;
 
 		/* output expected lockfile name.  */
-		sprintf(lockfile, ",%011" PRIx64 ".%d", ms, child);
+		snprintf(lockfile, sizeof lockfile,
+		    ",%011" PRIx64 ".%d", ms, child);
 		dprintf(1, "%s\n", lockfile);
 		close(0);
 		close(1);
@@ -183,7 +185,8 @@ usage:
 
 	/* create and lock lockfile.  since this cannot be done in one step,
 	   use a different filename first.  */
-	sprintf(lockfile, ".,%011" PRIx64 ".%d", ms, getpid());
+	snprintf(lockfile, sizeof lockfile,
+	    ".,%011" PRIx64 ".%d", ms, getpid());
 	lockfd = openat(dirfd, lockfile,
 	    O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
 	if (lockfd < 0) {
