@@ -122,7 +122,13 @@ usage:
 		goto wait;
 	}
 
-	pipe(pipefd);
+	/* create a pipe for communicaton between parent and child processes. */
+	int pipe_status;
+	pipe_status = pipe(pipefd);
+	if (pipe_status < 0) {
+		perror("pipe");
+		exit(111);
+	}
 
 	/* first fork, parent exits to run in background.  */
 	child = fork();
