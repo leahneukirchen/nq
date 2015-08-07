@@ -41,7 +41,7 @@
 
 #define FILENAME_BUFFSIZE 64
 
-void
+static void
 swrite(int fd, char *str)
 {
 	size_t l = strlen(str);
@@ -52,7 +52,7 @@ swrite(int fd, char *str)
 	}
 }
 
-void
+static void
 write_execline(int fd, int argc, char *argv[])
 {
 	int i;
