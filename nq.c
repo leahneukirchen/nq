@@ -39,6 +39,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#define FILENAME_BUFFSIZE 64
+
 void
 swrite(int fd, char *str)
 {
@@ -76,7 +78,7 @@ main(int argc, char *argv[])
 	int64_t ms;
 	int dirfd = 0, lockfd = 0, opt = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
-	char lockfile[64];
+	char lockfile[FILENAME_BUFFSIZE];
 	pid_t child;
 	struct timeval started;
 	struct dirent *ent;
