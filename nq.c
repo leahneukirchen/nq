@@ -280,6 +280,7 @@ again:
 	close(lockfd);
 
 	setenv("NQJOBID", lockfile+1, 1);
+	setsid();
 	execvp(argv[1], argv+1);
 
 	perror("execvp");
