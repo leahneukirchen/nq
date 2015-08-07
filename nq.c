@@ -39,7 +39,9 @@
 #include <time.h>
 #include <unistd.h>
 
-void
+#define FILENAME_BUFFSIZE 64
+
+static void
 swrite(int fd, char *str)
 {
 	size_t l = strlen(str);
@@ -50,7 +52,7 @@ swrite(int fd, char *str)
 	}
 }
 
-void
+static void
 write_execline(int fd, int argc, char *argv[])
 {
 	int i;
@@ -76,7 +78,7 @@ main(int argc, char *argv[])
 	int64_t ms;
 	int dirfd = 0, lockfd = 0, opt = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
-	char lockfile[64];
+	char lockfile[FILENAME_BUFFSIZE];
 	pid_t child;
 	struct timeval started;
 	struct dirent *ent;
@@ -122,7 +124,13 @@ usage:
 		goto wait;
 	}
 
-	pipe(pipefd);
+	/* create a pipe for communicaton between parent and child processes. */
+	int pipe_status;
+	pipe_status = pipe(pipefd);
+	if (pipe_status < 0) {
+		perror("pipe");
+		exit(111);
+	}
 
 	/* first fork, parent exits to run in background.  */
 	child = fork();
