@@ -122,7 +122,10 @@ usage:
 		goto wait;
 	}
 
-	pipe(pipefd);
+	if (pipe(pipefd) < 0) {
+		perror("pipe");
+		exit(111);
+	};
 
 	/* first fork, parent exits to run in background.  */
 	child = fork();
