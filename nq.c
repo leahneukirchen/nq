@@ -39,6 +39,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#define FILENAME_BUFFSIZE 64
+#define MKSTEMP_TEMPLATE "enqueue.XXXXXX"
+
 static void
 swrite(int fd, char *str)
 {
@@ -76,7 +79,7 @@ main(int argc, char *argv[])
 	int64_t ms;
 	int dirfd = 0, lockfd = 0, opt = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
-	char lockfile[64];
+	char lockfile[FILENAME_BUFFSIZE];
 	pid_t child;
 	struct timeval started;
 	struct dirent *ent;
@@ -118,7 +121,7 @@ usage:
 
 	if (tflag || wflag) {
 		snprintf(lockfile, sizeof lockfile,
-		    ".,%011" PRIx64 ".%d", ms, getpid());
+		    ",%011" PRIx64 ".%d", ms, getpid());
 		goto wait;
 	}
 
@@ -187,22 +190,30 @@ usage:
 	close(pipefd[1]);
 
 	/* create and lock lockfile.  since this cannot be done in one step,
-	   use a different filename first.  */
-	snprintf(lockfile, sizeof lockfile,
-	    ".,%011" PRIx64 ".%d", ms, getpid());
-	lockfd = openat(dirfd, lockfile,
-	    O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
+	   use a temporary file first. */
+	char tempfile[FILENAME_BUFFSIZE] = {MKSTEMP_TEMPLATE};
+	lockfd = mkstemp(tempfile);
 	if (lockfd < 0) {
-		perror("open");
+		perror("mkstemp");
 		exit(222);
 	}
+
+	int fsflag = fcntl(lockfd, F_GETFL, 0);
+	fsflag |= O_APPEND;
+	fcntl(lockfd, F_SETFL, fsflag);
+
 	if (flock(lockfd, LOCK_EX) < 0) {
 		perror("flock");
 		exit(222);
 	}
 
-	/* drop leading '.' */
-	renameat(dirfd, lockfile, dirfd, lockfile+1);
+	snprintf(lockfile, sizeof lockfile,
+	    ",%011" PRIx64 ".%d", ms, getpid());
+
+	if (renameat(AT_FDCWD, tempfile, dirfd, lockfile) < 0) {
+		perror("renameat");
+		exit(222);
+	}
 
 	write_execline(lockfd, argc, argv);
 
@@ -246,7 +257,7 @@ again:
 			/* wait for all ,* files.  */
 
 			if (ent->d_name[0] == ',' &&
-			    strcmp(ent->d_name, lockfile+1) < 0) {
+			    strcmp(ent->d_name, lockfile) < 0) {
 				int fd;
 
 				fd = openat(dirfd, ent->d_name, O_RDWR);
@@ -282,7 +293,7 @@ again:
 
 	close(lockfd);
 
-	setenv("NQJOBID", lockfile+1, 1);
+	setenv("NQJOBID", lockfile, 1);
 	setsid();
 	execvp(argv[1], argv+1);
 
