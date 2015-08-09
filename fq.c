@@ -47,7 +47,8 @@ main(int argc, char *argv[])
 	int i, fd;
 	off_t off, loff;
 	ssize_t rd;
-	int didsth = 0;
+	int didsth = 0, seen_nl = 0;
+	int opt = 0, qflag = 0;
 
 #ifdef USE_INOTIFY
 	int ifd, wd;
@@ -55,9 +56,23 @@ main(int argc, char *argv[])
 
 	close(0);
 
-	if (argc < 2) {
+	while ((opt = getopt(argc, argv, "+q")) != -1) {
+		switch (opt) {
+		case 'q':
+			qflag = 1;
+			break;
+		default:
+			exit(1);
+		}
+	}
+
+	if (optind == argc) {
 		/* little better than glob(3)... */
-		execl("/bin/sh", "sh", "-c", "fq ${NQDIR:+$NQDIR/},*", (char *) 0);
+		execl("/bin/sh", "sh", "-c",
+		    qflag ?
+		    "exec fq -q ${NQDIR:+$NQDIR/},*" :
+		    "exec fq ${NQDIR:+$NQDIR/},*",
+		    (char *) 0);
 		exit(111);
 	}
 
@@ -67,8 +82,9 @@ main(int argc, char *argv[])
 		exit(111);
 #endif
 
-	for (i = 1; i < argc; i++) {
+	for (i = optind; i < argc; i++) {
 		loff = 0;
+		seen_nl = 0;
 
 		fd = open(argv[i], O_RDONLY);
 		if (fd < 0)
@@ -81,7 +97,7 @@ main(int argc, char *argv[])
 
 		write(1, "==> ", 4);
 		write(1, argv[i], strlen(argv[i]));
-		write(1, "\n", 1);
+		write(1, qflag ? " " : "\n", 1);
 
 		didsth = 1;
 
@@ -117,7 +133,19 @@ main(int argc, char *argv[])
 				off = loff + sizeof buf;
 
 			rd = pread(fd, &buf, off - loff, loff);
-			write(1, buf, rd);
+			if (qflag) {
+				if (!seen_nl) {
+					char *s;
+					if ((s = memchr(buf, '\n', rd))) {
+						write(1, buf, s+1-buf);
+						seen_nl = 1;
+					} else {
+						write(1, buf, rd);
+					}
+				}
+			} else {
+				write(1, buf, rd);
+			}
 
 			loff += rd;
 		}
