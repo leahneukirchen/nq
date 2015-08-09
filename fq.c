@@ -190,6 +190,9 @@ main(int argc, char *argv[])
 			loff += rd;
 		}
 
+		if (qflag && !seen_nl)
+			write(1, "\n", 1);
+
 #ifdef USE_INOTIFY
 		inotify_rm_watch(ifd, wd);
 #endif
