@@ -56,8 +56,6 @@ main(int argc, char *argv[])
 	ssize_t rd;
 	int didsth = 0, seen_nl = 0;
 	int opt = 0, aflag = 0, qflag = 0;
-	DIR *dir;
-	struct dirent *d;
 	char *path;
 
 #ifdef USE_INOTIFY
@@ -82,12 +80,16 @@ main(int argc, char *argv[])
 	path = getenv("NQDIR");
 	if (!path)
 		path = ".";
+
 	dirfd = open(path, O_RDONLY);
 	if (dirfd < 0)
 		exit(111);
 
-	if (optind == argc) {
+	if (optind == argc) {	/* behave as if $NQDIR/,* was passed. */
+		DIR *dir;
+		struct dirent *d;
 		int len = 0;
+
 		argc = 0;
 		argv = 0;
 		optind = 0;
@@ -105,7 +107,8 @@ main(int argc, char *argv[])
 				if (!argv)
 					exit(222);
 			}
-			if (!(argv[argc] = strdup(d->d_name)))
+			argv[argc] = strdup(d->d_name);
+			if (!argv[argc])
 				exit(222);
 			argc++;
 		}
@@ -127,8 +130,8 @@ main(int argc, char *argv[])
 		if (fd < 0)
 			continue;
 
-		/* skip not running jobs, unless we did not output anything yet
-		 * and are at the last argument.  */
+		/* skip not running jobs, unless -a was passed, or we did not
+		 * output anything yet and are at the last argument.  */
 		if (!aflag && !islocked(fd) && (didsth || i != argc - 1))
 			continue;
 
