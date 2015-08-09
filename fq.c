@@ -14,6 +14,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -73,6 +74,7 @@ main(int argc, char *argv[])
 			qflag = 1;
 			break;
 		default:
+			fputs("usage: fq [-qa] [JOBID...]\n", stderr);
 			exit(1);
 		}
 	}
