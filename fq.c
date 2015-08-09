@@ -48,7 +48,7 @@ main(int argc, char *argv[])
 	off_t off, loff;
 	ssize_t rd;
 	int didsth = 0, seen_nl = 0;
-	int opt = 0, qflag = 0;
+	int opt = 0, aflag = 0, qflag = 0;
 
 #ifdef USE_INOTIFY
 	int ifd, wd;
@@ -56,8 +56,11 @@ main(int argc, char *argv[])
 
 	close(0);
 
-	while ((opt = getopt(argc, argv, "+q")) != -1) {
+	while ((opt = getopt(argc, argv, "+aq")) != -1) {
 		switch (opt) {
+		case 'a':
+			aflag = 1;
+			break;
 		case 'q':
 			qflag = 1;
 			break;
@@ -92,7 +95,7 @@ main(int argc, char *argv[])
 
 		/* skip not running jobs, unless we did not output anything yet
 		 * and are at the last argument.  */
-		if (!islocked(fd) && (didsth || i != argc - 1))
+		if (!aflag && !islocked(fd) && (didsth || i != args_cnt - 1))
 			continue;
 
 		write(1, "==> ", 4);
