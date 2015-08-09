@@ -103,10 +103,10 @@ main(int argc, char *argv[])
 				len = 2*len + 1;
 				argv = realloc(argv, len * sizeof (char *));
 				if (!argv)
-					break;
+					exit(222);
 			}
 			if (!(argv[argc] = strdup(d->d_name)))
-				break;
+				exit(222);
 			argc++;
 		}
 
