@@ -68,10 +68,10 @@ Two helper programs are provided:
 jobs are done.  If no job is running, the output of the last job is
 shown.  `fq -a` shows the output of all jobs, `fq -q` only shows one
 line per job.  `fq` uses `inotify` on Linux and falls back to polling
-for size change else.  `fq.sh` is a similar tool, not quite as robust,
-implemented as shell-script calling `tail`.
+for size change else.  (`fq.sh` is a similar tool, not quite as robust,
+implemented as shell-script calling `tail`.)
 
-`tq` wraps `nq` and displays the `fq` output in a new tmux window.
+`tq` wraps `nq` and displays the `fq` output in a new tmux or screen window.
 
 (A pure shell implementation of `nq` is provided as `nq.sh`.  It needs
 `flock` from util-linux, and only has a timer resolution of 1s.
