@@ -53,10 +53,7 @@ lock files produced, so you should clean them regularly.
 
 ## nq helpers
 
-Two helper scripts are provided:
-
-`tq` wraps `nq` and displays the output in a new tmux window (it needs
-`tmux` and GNU `tail`).
+Two helper programs are provided:
 
 `fq` outputs the log of the currently running jobs, exiting when the
 jobs are done.  If no job is running, the output of the last job is
@@ -64,6 +61,8 @@ shown.  `fq -a` shows the output of all jobs, `fq -q` only shows one
 line per job.  `fq` uses `inotify` on Linux and falls back to polling
 for size change else.  `fq.sh` is a similar tool, not quite as robust,
 implemented as shell-script calling `tail`.
+
+`tq` wraps `nq` and displays the `fq` output in a new tmux window.
 
 (A pure shell implementation of `nq` is provided as `nq.sh`.  It needs
 `flock` from util-linux, and only has a timer resolution of 1s.
