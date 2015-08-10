@@ -51,6 +51,15 @@ different queues for different purposes is encouraged.
 All these operations take worst-case quadratic time in the amount of
 lock files produced, so you should clean them regularly.
 
+## Assumptions
+
+`nq` will only work correctly when:
+- `$NQDIR` (respectively `.`) is writable.
+- `flock(2)` works in `$NQDIR` (respectively `.`).
+- `gettimeofday` behaves monotonic (using `CLOCK_MONOTONIC` would
+  create confusing file names).
+- No other programs put files matching `,*` into `$NQDIR` (respectively `.`).
+
 ## nq helpers
 
 Two helper programs are provided:
