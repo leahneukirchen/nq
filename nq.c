@@ -84,7 +84,7 @@ main(int argc, char *argv[])
 
 	/* timestamp is milliseconds since epoch.  */
 	gettimeofday(&started, NULL);
-	ms = started.tv_sec*1000 + started.tv_usec/1000;
+	ms = (int64_t)started.tv_sec*1000 + started.tv_usec/1000;
 
 	while ((opt = getopt(argc, argv, "+htw")) != -1) {
 		switch (opt) {
