@@ -1,0 +1,27 @@
+#compdef nq tq fq
+
+_nq_job() {
+	compadd "$@" -- ${NQDIR:-.}/,*.*(:t)
+}
+
+_nq() {
+	case "$service" in
+	fq)	_arguments -s -A : \
+			'-q[show only one line per job]' \
+			'-a[output for all jobs]' \
+			'*::job:_nq_job'
+		;;
+	nq)	_arguments -A : \
+			'-w[wait for jobs]:*:job:_nq_job' \
+			'-t[check jobs]:*:job:_nq_job' \
+			'(-):command name: _command_names -e' \
+			'*::arguments:_normal'
+		;;
+	tq)	_arguments : \
+			'(-):command name: _command_names -e' \
+			'*::arguments:_normal'
+		;;
+	esac
+}
+
+_nq "$@"
