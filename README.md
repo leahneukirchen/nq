@@ -34,7 +34,7 @@ into the log file.
 currently running job has +x bit set.  Thus you can use `ls -F` to get
 a quick overview of the state of your queue.
 
-The "file extension" of the log file is the actually PID, so you can
+The "file extension" of the log file is actually the PID, so you can
 kill jobs easily.  Before the job is started, it is the PID of `nq`,
 so you can cancel a queued job by killing it as well.
 
