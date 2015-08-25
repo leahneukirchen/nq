@@ -104,7 +104,7 @@ On fatal errors, exit codes 111 and 222 are used.
 .Sh TRICKS
 The "file extension" of the log file is actually the PID of the job.
 .Nm
-runs all jobs in a seperate process group,
+runs all jobs in a separate process group,
 so you can kill an entire job process tree at once using
 .Xr kill 1
 with a negative PID.
@@ -152,7 +152,7 @@ is writable.
 .It
 .Xr flock 2
 works correctly in
-.Ev $NQDIR
+.Ev NQDIR
 (respectively
 .Pa \&. ) .
 .It
