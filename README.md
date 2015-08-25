@@ -26,8 +26,9 @@ Enforcing job order works like this:
 - the lock is released by the kernel after the job terminates
 
 You enqueue (get it?) new jobs using `nq CMDLINE...`.  The job id is
-output and `nq` detaches immediately, running the job in the background.
-STDOUT and STDERR are redirected into the log file.
+output (unless suppressed using `-q`) and `nq` detaches immediately,
+running the job in the background.  STDOUT and STDERR are redirected
+into the log file.
 
 `nq` tries hard (but does not guarantee) to ensure the log file of the
 currently running job has +x bit set.  Thus you can use `ls -F` to get

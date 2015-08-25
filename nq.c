@@ -2,6 +2,7 @@
  * nq CMD... - run CMD... in background and in order, saving output
  * -w ...  wait for all jobs/listed jobs queued so far to finish
  * -t ...  exit 0 if no (listed) job needs waiting
+ * -q      quiet, do not output job id
  *
  * - requires POSIX.1-2008 and having flock(2)
  * - enforcing order works like this:
@@ -74,7 +75,7 @@ int
 main(int argc, char *argv[])
 {
 	int64_t ms;
-	int dirfd = 0, lockfd = 0, opt = 0, tflag = 0, wflag = 0;
+	int dirfd = 0, lockfd = 0, opt = 0, qflag = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
 	char lockfile[64];
 	pid_t child;
@@ -86,13 +87,16 @@ main(int argc, char *argv[])
 	gettimeofday(&started, NULL);
 	ms = (int64_t)started.tv_sec*1000 + started.tv_usec/1000;
 
-	while ((opt = getopt(argc, argv, "+htw")) != -1) {
+	while ((opt = getopt(argc, argv, "+hqtw")) != -1) {
 		switch (opt) {
 		case 'w':
 			wflag = 1;
 			break;
 		case 't':
 			tflag = 1;
+			break;
+                case 'q':
+			qflag = 1;
 			break;
 		case 'h':
 		default:
@@ -102,7 +106,7 @@ main(int argc, char *argv[])
 
 	if (argc <= 1) {
 usage:
-		swrite(2, "usage: nq [-w ... | -t ... | CMD...]\n");
+		swrite(2, "usage: nq [-q] [-w ... | -t ... | CMD...]\n");
 		exit(1);
 	}
 
@@ -157,7 +161,8 @@ usage:
 		/* output expected lockfile name.  */
 		snprintf(lockfile, sizeof lockfile,
 		    ",%011" PRIx64 ".%d", ms, child);
-		dprintf(1, "%s\n", lockfile);
+		if (!qflag)
+			dprintf(1, "%s\n", lockfile);
 		close(0);
 		close(1);
 		close(2);
@@ -284,7 +289,7 @@ again:
 
 	setenv("NQJOBID", lockfile+1, 1);
 	setsid();
-	execvp(argv[1], argv+1);
+	execvp(argv[optind], argv+optind);
 
 	perror("execvp");
 	return 222;
