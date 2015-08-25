@@ -1,0 +1,55 @@
+.Dd August 25, 2015
+.Dt TQ 1
+.Os
+.Sh NAME
+.Nm tq
+.Nd job queue wrapper for tmux/screen
+.Sh SYNOPSIS
+.Nm
+.Ar command\ line ...
+.Sh DESCRIPTION
+.Nm
+is a tiny wrapper around the
+.Xr nq 1
+job queue which automatically spawns a corresponding
+.Xr fq 1
+watching process in a new
+.Xr tmux 1
+or
+.Xr screen 1
+window.
+.Pp
+You can cancel the
+.Xr nq 1
+job by pressing
+.Ic C-c
+in the job output window.
+.Pp
+After the job has finished, the window will
+close on
+.Ic C-d .
+.Sh ENVIRONMENT
+.Bl -hang -width Ds
+.It Ev NQDIR
+Directory where lock files/job output resides, see
+.Xr nq 1 .
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr nq 1 ,
+.Xr fq 1 ,
+.Xr tmux 1 ,
+.Xr screen 1
+.Sh AUTHORS
+.An Christian Neukirchen Aq Mt chneukirchen@gmail.com
+.Sh LICENSE
+.Nm
+is in the public domain.
+.Pp
+To the extent possible under law,
+the creator of this work
+has waived all copyright and related or
+neighboring rights to this work.
+.Pp
+.Lk http://creativecommons.org/publicdomain/zero/1.0/
+.\" .Sh BUGS

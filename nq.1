@@ -1,0 +1,200 @@
+.Dd August 25, 2015
+.Dt NQ 1
+.Os
+.Sh NAME
+.Nm nq
+.Nd job queue utility
+.Sh SYNOPSIS
+.Nm
+.Op Fl q
+.Ar command\ line ...
+.Nm
+.Fl t
+.Ar job\ id ...
+.Nm
+.Fl w
+.Ar job\ id ...
+.Sh DESCRIPTION
+The
+.Nm
+utility provides a very lightweight queuing system without
+requiring setup,
+maintenance,
+supervision
+or any long-running processes.
+.Pp
+Job order is enforced by a timestamp
+.Nm
+gets immediately when started.
+Synchronization happens on file-system level.
+Timer resolution is milliseconds.
+No sub-second file system time stamps are required.
+Polling is not used.
+Exclusive execution is maintained strictly.
+.Pp
+You enqueue(!) new jobs into the queue by running
+.Pp
+.Dl nq Ar command line ...
+.Pp
+The job id (a file name relative to
+.Ev NQDIR ,
+which defaults to the current directory) is
+output (unless suppressed using
+.Fl q )
+and
+.Nm
+detaches from the terminal immediately,
+running the job in the background.
+Standard output and standard error are redirected into the job id file.
+.Xr fq 1
+can be used to conveniently watch the log files.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl q
+Suppress output of the job id after spawning new job.
+.It Fl t
+Enter
+.Em test mode :
+exit with status 0 when
+.Em all
+of the listed job ids are already done, else with status 1.
+.It Fl w
+Enter
+.Em waiting mode :
+wait in the foreground until
+.Em all
+listed job ids are done.
+.El
+.Sh ENVIRONMENT
+.Bl -hang -width Ds
+.It Ev NQDIR
+Directory where lock files/job output resides.
+Each
+.Ev NQDIR
+can be considered a separate queue.
+The current working directory is used when
+.Ev NQDIR is unset.
+.It Ev NQJOBID
+The job id of the currently running job,
+exposed to the job itself.
+.El
+.Sh FILES
+.Nm
+owns all files in
+.Ev NQDIR
+(respectively
+.Pa \&. )
+which start with
+.Dq Li \&,
+or
+.Dq Li \&., .
+These files are created according to the following scheme:
+.Pp
+.Dl ,hexadecimal-time-stamp.pid
+.Sh EXIT STATUS
+The
+.Nm
+utility exits 0 on success, and >0 if an error occurs;
+unless
+.Em test mode
+is used, in which case exit status 1 means there is a job running.
+.Pp
+On fatal errors, exit codes 111 and 222 are used.
+.Sh TRICKS
+The "file extension" of the log file is actually the PID of the job.
+.Nm
+runs all jobs in a seperate process group,
+so you can kill an entire job process tree at once using
+.Xr kill 1
+with a negative PID.
+Before the job is started, it is the PID of
+.Nm ,
+so you can cancel a queued job by killing it as well.
+.Pp
+Thanks to the initial
+.Li exec
+line in the log files, you can resubmit a
+job by executing it as a shell command file,
+i.e. running
+.Pp
+.Dl sh Em job\ id
+.Pp
+Creating
+.Nm
+wrappers setting
+.Ev NQDIR
+to provide different queues for different purposes is encouraged.
+.Sh INTERNALS
+Enforcing job order works like this:
+.Bl -dash -compact
+.It
+every job has an
+output file locked using
+.Xr flock 2
+and named according to
+.Sx FILES .
+.It
+every job starts only after all earlier
+flocked files are unlocked.
+.It
+the lock is released by the kernel after the job terminates.
+.El
+.Sh ASSUMPTIONS
+.Nm
+will only work correctly when:
+.Bl -dash
+.It
+.Ev NQDIR
+(respectively
+.Pa \&. )
+is writable.
+.It
+.Xr flock 2
+works correctly in
+.Ev $NQDIR
+(respectively
+.Pa \&. ) .
+.It
+.Xr gettimeofday 3
+behaves monotonic (using
+.Dv CLOCK_MONOTONIC
+would create confusing file names after reboot).
+.It
+No other programs put files matching
+.Li ,*
+into
+.Ev NQDIR
+(respectively
+.Pa \&. ) .
+.El
+.Sh SEE ALSO
+.Xr fq 1 ,
+.Xr tq 1 .
+.Pp
+Alternatives to the
+.Nm
+system include
+.Xr batch 1 ,
+.Xr qsub 1 ,
+.Xr schedule 1 ,
+.Xr srun 1 , and
+.Xr ts 1 .
+.\" .Sh STANDARDS
+.\" .Sh HISTORY
+.Sh AUTHORS
+.An Christian Neukirchen Aq Mt chneukirchen@gmail.com
+.Sh CAVEATS
+All reliable queue status information is in main memory only,
+which makes restarting a job queue after a reboot difficult.
+.Sh LICENSE
+.Nm
+is in the public domain.
+.Pp
+To the extent possible under law,
+the creator of this work
+has waived all copyright and related or
+neighboring rights to this work.
+.Pp
+.Lk http://creativecommons.org/publicdomain/zero/1.0/
+.\" .Sh BUGS

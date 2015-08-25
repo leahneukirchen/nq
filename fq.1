@@ -1,0 +1,64 @@
+.Dd August 25, 2015
+.Dt FQ 1
+.Os
+.Sh NAME
+.Nm fq
+.Nd job queue log viewer
+.Sh SYNOPSIS
+.Nm
+.Op Fl a
+.Op Fl q
+.Op Ar job\ id ...
+.Sh DESCRIPTION
+.Nm
+is a simple utility for
+.Dq following
+the output of
+.Xr nq 1
+jobs.
+.Pp
+Without arguments, the output of the currently running and queued
+as-of-now jobs is emitted; else the presented job ids are used.
+.Pp
+.Nm
+automatically terminates after the corresponding jobs are done.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl a
+Output all log files, even of already finished jobs.
+.It Fl q
+Only print the first line of each job output
+(i.e. the
+.Li exec
+line).
+.El
+.Sh ENVIRONMENT
+.Bl -hang -width Ds
+.It Ev NQDIR
+Directory where lock files/job output resides, see
+.Xr nq 1 .
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh INTERNALS
+On Linux,
+.Xr inotify 7
+is used to monitor job output.
+On other operating systems, polling is used.
+.Sh SEE ALSO
+.Xr nq 1 ,
+.Xr tq 1
+.Sh AUTHORS
+.An Christian Neukirchen Aq Mt chneukirchen@gmail.com
+.Sh LICENSE
+.Nm
+is in the public domain.
+.Pp
+To the extent possible under law,
+the creator of this work
+has waived all copyright and related or
+neighboring rights to this work.
+.Pp
+.Lk http://creativecommons.org/publicdomain/zero/1.0/
+.\" .Sh BUGS
