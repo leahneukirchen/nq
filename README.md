@@ -78,6 +78,15 @@ implemented as shell-script calling `tail`.)
 `flock` from util-linux, and only has a timer resolution of 1s.
 Lock files from `nq` and `nq.sh` should not be mixed.)
 
+## Installation
+
+Use `make all` to build, `make install` to install relative to `PREFIX`
+(`/usr/local` by default).  The `DESTDIR` convention is respected.
+You can also just copy the binaries into your `PATH`.
+
+You can use `make check` to run a simple test suite, if you have
+Perl's `prove` installed.
+
 ## Copyright
 
 nq is in the public domain.
