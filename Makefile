@@ -12,7 +12,7 @@ all: $(ALL)
 clean: FRC
 	rm -f nq fq
 
-check: FRC
+check: FRC all
 	prove -v ./tests
 
 install: FRC all
