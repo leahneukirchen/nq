@@ -52,6 +52,40 @@ different queues for different purposes is encouraged.
 All these operations take worst-case quadratic time in the amount of
 lock files produced, so you should clean them regularly.
 
+## Examples
+
+Build targets `clean`, `depends`, `all`, without occupying the terminal:
+
+	% nq make clean
+	% nq make depends
+	% nq make all
+	% fq
+	... look at output, can interrupt with C-c any time
+	without stopping the build ...
+
+Simple download queue, accessible from multiple terminals:
+
+	% mkdir -p /tmp/downloads
+	% alias qget='NQDIR=/tmp/downloads nq wget'
+	% alias qwait='NQDIR=/tmp/downloads fq -q'
+	window1% qget http://mymirror/big1.iso
+	window2% qget http://mymirror/big2.iso
+	window3% qget http://mymirror/big3.iso
+	% qwait
+	... wait for all downloads to finish ...
+
+As nohup replacement (The benchmark will run in background, every run
+gets a different output file, and the command line you ran is logged
+too.):
+
+	% ssh remote
+	remote% nq ./run-benchmark
+	,14f6f3034f8.17035
+	remote% ^D
+	% ssh remote
+	remote% fq
+	... see output, fq exits when job finished ...
+
 ## Assumptions
 
 `nq` will only work correctly when:
