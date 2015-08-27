@@ -209,6 +209,9 @@ usage:
 	/* drop leading '.' */
 	renameat(dirfd, lockfile, dirfd, lockfile+1);
 
+	/* block until rename is committed */
+	fsync(dirfd);
+
 	write_execline(lockfd, argc, argv);
 
 	dup2(lockfd, 2);
