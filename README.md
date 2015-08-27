@@ -78,6 +78,16 @@ implemented as shell-script calling `tail`.)
 `flock` from util-linux, and only has a timer resolution of 1s.
 Lock files from `nq` and `nq.sh` should not be mixed.)
 
+## Compiling
+
+`nq` can be built by running `make` (or `make all`) from within it's source directory.
+This will produce two executables (`nq` and `fq`), which can be installed
+wherever you wish.
+
+The Makefile also provides a `make check` target, which can be used to test the behaviour
+of the produced executables. `make check` assumes that the `nq`, and `fq` executables
+are present in the current working directory, along with the `tq` script.
+
 ## Copyright
 
 nq is in the public domain.
