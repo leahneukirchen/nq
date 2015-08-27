@@ -44,9 +44,9 @@ islocked(int fd)
 }
 
 static int
-alphabetic(const void* a, const void* b)
+alphabetic(const void *a, const void *b)
 {
-	return strcmp(*(char**)a, *(char **)b);
+	return strcmp(*(char **)a, *(char **)b);
 }
 
 int
