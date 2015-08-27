@@ -92,7 +92,8 @@ too.):
 - `$NQDIR` (respectively `.`) is writable.
 - `flock(2)` works in `$NQDIR` (respectively `.`).
 - `gettimeofday` behaves monotonic (using `CLOCK_MONOTONIC` would
-  create confusing file names).
+  create confusing file names).  Else job order can be confused and
+  multiple tasks can run at once due to race conditions.
 - No other programs put files matching `,*` into `$NQDIR` (respectively `.`).
 
 ## nq helpers
