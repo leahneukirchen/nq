@@ -5,8 +5,9 @@ nq should run on any POSIX.1-2008 compliant system which also provides a working
 OS X 10.3.
 
 The intended purpose is ad-hoc queuing of command lines (e.g. for building
-several targets of a Makefile, downloading multiple files one at a time, running benchmarks in several configurations, or simply as a glorified nohup), but as
-any good Unix tool, it can be abused for whatever you like.
+several targets of a Makefile, downloading multiple files one at a time, 
+running benchmarks in several configurations, or simply as a glorified nohup),
+but as any good Unix tool, it can be abused for whatever you like.
 
 Job order is enforced by a timestamp nq gets immediately when started.
 Synchronization happens on file-system level. Timer resolution is milliseconds.
@@ -38,9 +39,11 @@ to wait for; the default is all of them. Likewise, you can test if there are
 jobs which need to be waited upon using -t.
 
 By default, job ids are per-directory, but you can set $NQDIR to put them
-elsewhere. Creating nq wrappers setting $NQDIR to provide different queues for different purposes is encouraged.
+elsewhere. Creating nq wrappers setting $NQDIR to provide different queues for 
+different purposes is encouraged.
 
-All these operations take worst-case quadratic time in the amount of lock files produced, so you should clean them regularly.
+All these operations take worst-case quadratic time in the amount of lock files
+produced, so you should clean them regularly.
 
 Examples
 
