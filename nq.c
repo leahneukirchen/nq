@@ -214,8 +214,11 @@ usage:
 
 	write_execline(lockfd, argc, argv);
 
-	dup2(lockfd, 2);
-	dup2(lockfd, 1);
+	if (dup2(lockfd, 2) < 0 ||
+	    dup2(lockfd, 1) < 0) {
+		perror("dup2");
+		exit(222);
+	}
 
 wait:
 	if ((tflag || wflag) && argc - optind > 0) {
