@@ -122,6 +122,12 @@ You can also just copy the binaries into your `PATH`.
 You can use `make check` to run a simple test suite, if you have
 Perl's `prove` installed.
 
+##Arch Linux Installation
+
+nq-git package build is available in the AUR. Can be installed by using any AUR helper such as yaourt or pacaur.
+
+`yaourt -S nq-git`
+
 ## Copyright
 
 nq is in the public domain.
