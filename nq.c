@@ -121,7 +121,7 @@ usage:
 		}
 	}
 
-	dirfd = open(path, O_RDONLY);
+	dirfd = open(path, O_RDONLY | O_DIRECTORY);
 	if (dirfd < 0) {
 		perror("dir open");
 		exit(111);
