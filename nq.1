@@ -75,6 +75,8 @@ Each
 can be considered a separate queue.
 The current working directory is used when
 .Ev NQDIR is unset.
+.Ev NQDIR
+is created if needed.
 .It Ev NQJOBID
 The job id of the currently running job,
 exposed to the job itself.
@@ -101,6 +103,49 @@ unless
 is used, in which case exit status 1 means there is a job running.
 .Pp
 On fatal errors, exit codes 111 and 222 are used.
+.Sh EXAMPLES
+Build
+.Xr make 1
+targets
+.Ic clean ,
+.Ic depends,
+.Ic all ,
+without occupying the terminal:
+.Bd -literal -offset indent
+% nq make clean
+% nq make depends
+% nq make all
+% fq
+\&... look at output, can interrupt with C-c any time
+without stopping the build ...
+.Ed
+.Pp
+Simple download queue, accessible from multiple terminals:
+.Bd -literal -offset indent
+% alias qget='NQDIR=/tmp/downloads nq wget'
+% alias qwait='NQDIR=/tmp/downloads fq -q'
+window1% qget http://mymirror/big1.iso
+window2% qget http://mymirror/big2.iso
+window3% qget http://mymirror/big3.iso
+% qwait
+\&... wait for all downloads to finish ...
+.Ed
+.Pp
+As
+.Xr nohup 1
+replacement
+(The benchmark will run in background,
+every run gets a different output file,
+and the command line you ran is logged too.):
+.Bd -literal -offset indent
+% ssh remote
+remote% nq ./run-benchmark
+,14f6f3034f8.17035
+remote% ^D
+% ssh remote
+remote% fq
+\&... see output, fq exits when job finished ...
+.Ed
 .Sh TRICKS
 The "file extension" of the log file is actually the PID of the job.
 .Nm
