@@ -83,9 +83,11 @@ main(int argc, char *argv[])
 	if (!path)
 		path = ".";
 
-	dirfd = open(path, O_RDONLY);
-	if (dirfd < 0)
+	dirfd = open(path, O_RDONLY | O_DIRECTORY);
+	if (dirfd < 0) {
+		perror("open dir");
 		exit(111);
+	}
 
 	if (optind == argc) {	/* behave as if $NQDIR/,* was passed. */
 		DIR *dir;
