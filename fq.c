@@ -35,7 +35,7 @@ char buf[8192];
 static int
 islocked(int fd)
 {
-	if (flock(fd, LOCK_EX|LOCK_NB) == -1) {
+	if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
 		return (errno == EWOULDBLOCK);
 	} else {
 		flock(fd, LOCK_UN);
@@ -146,7 +146,7 @@ main(int argc, char *argv[])
 		didsth = 1;
 
 #ifdef USE_INOTIFY
-		wd = inotify_add_watch(ifd, argv[i], IN_MODIFY|IN_CLOSE_WRITE);
+		wd = inotify_add_watch(ifd, argv[i], IN_MODIFY | IN_CLOSE_WRITE);
 #endif
 
 		while (1) {
@@ -156,7 +156,7 @@ main(int argc, char *argv[])
 				loff = off;               /* file truncated */
 
 			if (off == loff) {
-				if (flock(fd, LOCK_EX|LOCK_NB) == -1 &&
+				if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
 				    errno == EWOULDBLOCK) {
 #ifdef USE_INOTIFY
 					/* any inotify event is good */
