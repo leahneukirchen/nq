@@ -114,6 +114,13 @@ usage:
 	if (!path)
 		path = ".";
 
+	if (mkdir(path, 0777) < 0) {
+		if (errno != EEXIST) {
+			perror("mkdir");
+			exit(111);
+		}
+	}
+
 	dirfd = open(path, O_RDONLY);
 	if (dirfd < 0) {
 		perror("dir open");
