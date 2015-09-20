@@ -23,7 +23,9 @@ strictly.
 Enforcing job order works like this:
 - every job has a flock(2)ed output file ala `,TIMESTAMP.PID`
 - every job starts only after all earlier flock(2)ed files are unlocked
-- the lock is released by the kernel after the job terminates
+- Why flock(2)? Because it locks the file handle, which is shared
+  across exec(2) with the child process (the actual job), and it will
+  unlock when the file is closed (usually when the job terminates).
 
 You enqueue (get it?) new jobs using `nq CMDLINE...`.  The job id is
 output (unless suppressed using `-q`) and `nq` detaches immediately,
