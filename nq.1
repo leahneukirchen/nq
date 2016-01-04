@@ -74,7 +74,8 @@ Each
 .Ev NQDIR
 can be considered a separate queue.
 The current working directory is used when
-.Ev NQDIR is unset.
+.Ev NQDIR
+is unset.
 .Ev NQDIR
 is created if needed.
 .It Ev NQJOBID
@@ -108,7 +109,7 @@ Build
 .Xr make 1
 targets
 .Ic clean ,
-.Ic depends,
+.Ic depends ,
 .Ic all ,
 without occupying the terminal:
 .Bd -literal -offset indent
@@ -201,7 +202,7 @@ works correctly in
 (respectively
 .Pa \&. ) .
 .It
-.Xr gettimeofday 3
+.Xr gettimeofday 2
 behaves monotonic (using
 .Dv CLOCK_MONOTONIC
 would create confusing file names after reboot).
@@ -223,7 +224,8 @@ system include
 .Xr batch 1 ,
 .Xr qsub 1 ,
 .Xr schedule 1 ,
-.Xr srun 1 , and
+.Xr srun 1 ,
+and
 .Xr ts 1 .
 .\" .Sh STANDARDS
 .\" .Sh HISTORY
