@@ -23,6 +23,10 @@
 /* for FreeBSD.  */
 #define _WITH_DPRINTF
 
+#if defined(__sun) && defined(__SVR4) && !defined(HAVE_DPRINTF)
+#define NEED_DPRINTF
+#endif
+
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -39,6 +43,24 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+
+#ifdef NEED_DPRINTF
+#include <stdarg.h>
+static int
+dprintf(int fd, const char *fmt, ...)
+{
+	char buf[128];  // good enough for usage in nq
+	va_list ap;
+	int r;
+
+	va_start(ap, fmt);
+	r = vsnprintf(buf, sizeof buf, fmt, ap);
+	va_end(ap);
+	if (r >= 0 && r < sizeof buf)
+		return write(fd, buf, r);
+	return -1;
+}
+#endif
 
 static void
 swrite(int fd, char *str)
