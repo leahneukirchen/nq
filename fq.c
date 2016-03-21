@@ -83,7 +83,11 @@ main(int argc, char *argv[])
 	if (!path)
 		path = ".";
 
+#ifdef O_DIRECTORY
 	dirfd = open(path, O_RDONLY | O_DIRECTORY);
+#else
+	dirfd = open(path, O_RDONLY);
+#endif
 	if (dirfd < 0) {
 		perror("open dir");
 		exit(111);
@@ -99,8 +103,10 @@ main(int argc, char *argv[])
 		optind = 0;
 
 		dir = fdopendir(dirfd);
-		if (!dir)
+		if (!dir) {
+			perror("fdopendir");
 			exit(111);
+		}
 
 		while ((d = readdir(dir))) {
 			if (d->d_name[0] != ',')
