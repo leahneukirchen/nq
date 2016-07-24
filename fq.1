@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl a
+.Op Fl n
 .Op Fl q
 .Op Ar job\ id ...
 .Sh DESCRIPTION
@@ -27,6 +28,9 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Fl a
 Output all log files, even of already finished jobs.
+.It Fl n
+Don't wait for new output.
+Can be used to look at enqueued commands.
 .It Fl q
 Only print the first line of each job output
 (i.e. the

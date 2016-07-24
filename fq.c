@@ -56,7 +56,7 @@ main(int argc, char *argv[])
 	off_t off, loff;
 	ssize_t rd;
 	int didsth = 0, seen_nl = 0;
-	int opt = 0, aflag = 0, qflag = 0;
+	int opt = 0, aflag = 0, nflag = 0, qflag = 1;
 	char *path;
 
 #ifdef USE_INOTIFY
@@ -65,16 +65,19 @@ main(int argc, char *argv[])
 
 	close(0);
 
-	while ((opt = getopt(argc, argv, "+aq")) != -1) {
+	while ((opt = getopt(argc, argv, "+anq")) != -1) {
 		switch (opt) {
 		case 'a':
 			aflag = 1;
+			break;
+		case 'n':
+			nflag = 1;
 			break;
 		case 'q':
 			qflag = 1;
 			break;
 		default:
-			fputs("usage: fq [-qa] [JOBID...]\n", stderr);
+			fputs("usage: fq [-anq] [JOBID...]\n", stderr);
 			exit(1);
 		}
 	}
@@ -162,6 +165,9 @@ main(int argc, char *argv[])
 				loff = off;               /* file truncated */
 
 			if (off == loff) {
+				if (nflag && islocked(fd))
+					break;
+
 				if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
 				    errno == EWOULDBLOCK) {
 #ifdef USE_INOTIFY
