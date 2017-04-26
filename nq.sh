@@ -10,7 +10,7 @@
 #   - every job starts only after all earlier flock(2)ed files finished
 #   - the lock is released when job terminates
 #
-# To the extent possible under law, Christian Neukirchen <chneukirchen@gmail.com>
+# To the extent possible under law, Leah Neukirchen <leah@vuxu.org>
 # has waived all copyright and related or neighboring rights to this work.
 # http://creativecommons.org/publicdomain/zero/1.0/
 

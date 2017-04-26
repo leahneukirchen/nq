@@ -14,8 +14,7 @@
  * - we try hard to make the currently running ,* file have +x bit
  * - you can re-queue jobs using "sh ,jobid"
  *
- * To the extent possible under law,
- * Christian Neukirchen <chneukirchen@gmail.com>
+ * To the extent possible under law, Leah Neukirchen <leah@vuxu.org>
  * has waived all copyright and related or neighboring rights to this work.
  * http://creativecommons.org/publicdomain/zero/1.0/
 */
