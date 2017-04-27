@@ -55,7 +55,7 @@ main(int argc, char *argv[])
 	off_t off, loff;
 	ssize_t rd;
 	int didsth = 0, seen_nl = 0;
-	int opt = 0, aflag = 0, nflag = 0, qflag = 1;
+	int opt = 0, aflag = 0, nflag = 0, qflag = 0;
 	char *path;
 
 #ifdef USE_INOTIFY
