@@ -95,7 +95,7 @@ main(int argc, char *argv[])
 		exit(111);
 	}
 
-	if (optind == argc) {	/* behave as if $NQDIR/,* was passed. */
+	if (optind == argc) {   /* behave as if $NQDIR/,* was passed. */
 		DIR *dir;
 		struct dirent *d;
 		int len = 0;

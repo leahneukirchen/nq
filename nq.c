@@ -116,7 +116,7 @@ main(int argc, char *argv[])
 		case 't':
 			tflag = 1;
 			break;
-                case 'q':
+		case 'q':
 			qflag = 1;
 			break;
 		case 'h':
@@ -312,7 +312,7 @@ again:
 			}
 		}
 
-		closedir(dir);		/* closes dirfd too.  */
+		closedir(dir);          /* closes dirfd too.  */
 	}
 
 	if (tflag || wflag)
