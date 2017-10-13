@@ -6,7 +6,7 @@ long-running processes.
 
 `nq` should run on any POSIX.1-2008 compliant system which also
 provides a working flock(2).  Tested on Linux 2.6.37, Linux 4.1,
-OpenBSD 5.7, FreeBSD 10.1, Mac OS X 10.3 and
+OpenBSD 5.7, FreeBSD 10.1, NetBSD 7.0.2, Mac OS X 10.3 and
 SmartOS joyent_20160304T005100Z.
 
 The intended purpose is ad-hoc queuing of command lines (e.g. for
