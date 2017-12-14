@@ -157,6 +157,10 @@ main(int argc, char *argv[])
 		char fullpath[PATH_MAX];
 		snprintf(fullpath, PATH_MAX, "%s/%s", path, argv[i]);
 		wd = inotify_add_watch(ifd, fullpath, IN_MODIFY | IN_CLOSE_WRITE);
+		if (wd == -1) {
+			perror("inotify_add_watch");
+			exit(1);
+		}
 #endif
 
 		while (1) {
