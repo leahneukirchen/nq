@@ -154,7 +154,9 @@ main(int argc, char *argv[])
 		didsth = 1;
 
 #ifdef USE_INOTIFY
-		wd = inotify_add_watch(ifd, argv[i], IN_MODIFY | IN_CLOSE_WRITE);
+		char fullpath[PATH_MAX];
+		snprintf(fullpath, PATH_MAX, "%s/%s", path, argv[i]);
+		wd = inotify_add_watch(ifd, fullpath, IN_MODIFY | IN_CLOSE_WRITE);
 #endif
 
 		while (1) {
