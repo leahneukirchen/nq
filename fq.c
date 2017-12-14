@@ -13,6 +13,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -154,7 +155,13 @@ main(int argc, char *argv[])
 		didsth = 1;
 
 #ifdef USE_INOTIFY
-		wd = inotify_add_watch(ifd, argv[i], IN_MODIFY | IN_CLOSE_WRITE);
+		char fullpath[PATH_MAX];
+		snprintf(fullpath, sizeof fullpath, "%s/%s", path, argv[i]);
+		wd = inotify_add_watch(ifd, fullpath, IN_MODIFY | IN_CLOSE_WRITE);
+		if (wd == -1) {
+			perror("inotify_add_watch");
+			exit(111);
+		}
 #endif
 
 		while (1) {
