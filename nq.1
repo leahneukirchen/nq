@@ -6,6 +6,7 @@
 .Nd job queue utility
 .Sh SYNOPSIS
 .Nm
+.Op Fl c
 .Op Fl q
 .Ar command\ line ...
 .Nm
@@ -51,6 +52,8 @@ can be used to conveniently watch the log files.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
+.It Fl c
+Clean up job id file when process exited with status 0.
 .It Fl q
 Suppress output of the job id after spawning new job.
 .It Fl t

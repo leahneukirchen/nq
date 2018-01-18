@@ -3,6 +3,7 @@
  * -w ...  wait for all jobs/listed jobs queued so far to finish
  * -t ...  exit 0 if no (listed) job needs waiting
  * -q      quiet, do not output job id
+ * -c      clean, don't keep output if job exited with status 0
  *
  * - requires POSIX.1-2008 and having flock(2)
  * - enforcing order works like this:
@@ -18,6 +19,8 @@
  * has waived all copyright and related or neighboring rights to this work.
  * http://creativecommons.org/publicdomain/zero/1.0/
 */
+
+#define _XOPEN_SOURCE 700
 
 /* for FreeBSD.  */
 #define _WITH_DPRINTF
@@ -96,7 +99,8 @@ int
 main(int argc, char *argv[])
 {
 	int64_t ms;
-	int dirfd = 0, lockfd = 0, opt = 0, qflag = 0, tflag = 0, wflag = 0;
+	int dirfd = 0, lockfd = 0;
+	int opt = 0, cflag = 0, qflag = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
 	char lockfile[64];
 	pid_t child;
@@ -108,8 +112,11 @@ main(int argc, char *argv[])
 	gettimeofday(&started, NULL);
 	ms = (int64_t)started.tv_sec*1000 + started.tv_usec/1000;
 
-	while ((opt = getopt(argc, argv, "+hqtw")) != -1) {
+	while ((opt = getopt(argc, argv, "+chqtw")) != -1) {
 		switch (opt) {
+		case 'c':
+			cflag = 1;
+			break;
 		case 'w':
 			wflag = 1;
 			break;
@@ -127,7 +134,7 @@ main(int argc, char *argv[])
 
 	if (argc <= 1) {
 usage:
-		swrite(2, "usage: nq [-q] [-w ... | -t ... | CMD...]\n");
+		swrite(2, "usage: nq [-c] [-q] [-w ... | -t ... | CMD...]\n");
 		exit(1);
 	}
 
@@ -211,12 +218,15 @@ usage:
 		}
 
 		fchmod(lockfd, 0600);
-		if (WIFEXITED(status))
+		if (WIFEXITED(status)) {
 			dprintf(lockfd, "\n[exited with status %d.]\n",
 			    WEXITSTATUS(status));
-		else
+			if (cflag && WEXITSTATUS(status) == 0)
+				unlinkat(dirfd, lockfile, 0);
+		} else {
 			dprintf(lockfd, "\n[killed by signal %d.]\n",
 			    WTERMSIG(status));
+		}
 
 		exit(0);
 	}

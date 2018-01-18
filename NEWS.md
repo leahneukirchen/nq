@@ -1,3 +1,7 @@
+## HEAD
+
+* nq: add `-c` to clean job file when the process succeeded.
+
 ## 0.2.2 (2017-12-21)
 
 * fq: fix when `$NQDIR` is set and inotify is used.  (Thanks to Sebastian Reuße)
