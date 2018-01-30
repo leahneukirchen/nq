@@ -124,8 +124,10 @@ main(int argc, char *argv[])
 			goto usage;
 		}
 	}
+	argc -= optind;
+	argv += optind;
 
-	if (argc <= 1) {
+	if (!tflag && !wflag && argc < 1) {
 usage:
 		swrite(2, "usage: nq [-q] [-w ... | -t ... | CMD...]\n");
 		exit(1);
@@ -244,7 +246,7 @@ usage:
 	/* block until rename is committed */
 	fsync(dirfd);
 
-	write_execline(lockfd, argc, argv);
+	write_execline(lockfd, argc + optind, argv - optind);
 
 	if (dup2(lockfd, 2) < 0 ||
 	    dup2(lockfd, 1) < 0) {
@@ -253,11 +255,11 @@ usage:
 	}
 
 wait:
-	if ((tflag || wflag) && argc - optind > 0) {
+	if ((tflag || wflag) && argc > 0) {
 		/* wait for files passed as command line arguments.  */
 
 		int i;
-		for (i = optind; i < argc; i++) {
+		for (i = 0; i < argc; i++) {
 			int fd;
 
 			if (strchr(argv[i], '/'))
@@ -327,7 +329,7 @@ again:
 
 	setenv("NQJOBID", lockfile+1, 1);
 	setsid();
-	execvp(argv[optind], argv+optind);
+	execvp(argv[0], argv);
 
 	perror("execvp");
 	return 222;
