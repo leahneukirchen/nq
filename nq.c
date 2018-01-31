@@ -132,7 +132,7 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if (argc <= 1) {
+	if (argc <= optind) {
 usage:
 		swrite(2, "usage: nq [-c] [-q] [-w ... | -t ... | CMD...]\n");
 		exit(1);
