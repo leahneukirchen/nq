@@ -1,6 +1,8 @@
-## HEAD
+## 0.3 (2018-03-06)
 
 * nq: add `-c` to clean job file when the process succeeded.
+* nq: avoid unnecessary quoting for the exec line.
+* Bugfix when `-q` was used with empty command lines.
 
 ## 0.2.2 (2017-12-21)
 
