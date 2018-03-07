@@ -1,3 +1,7 @@
+## 0.3.1 (2018-03-07)
+
+* Fix build on FreeBSD, OpenBSD and macOS.
+
 ## 0.3 (2018-03-06)
 
 * nq: add `-c` to clean job file when the process succeeded.
