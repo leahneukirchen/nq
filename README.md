@@ -129,10 +129,10 @@ Perl's `prove` installed.
 
 * `at` runs jobs at a given time.
   `batch` runs jobs "when system load levels permit".
-  nq runs jobs in sequence with no regard to the system's load average.
+  `nq` runs jobs in sequence with no regard to the system's load average.
 
 * `at` and `batch` have 52 built-in queues: a-z and A-Z.
-  Any directory can be a queue for nq.
+  Any directory can be a queue for `nq`.
 
 * You can follow the output of an `nq` queue tail-style with `fq`.
 
@@ -140,11 +140,11 @@ Perl's `prove` installed.
   the standard input or a file; `nq` takes a single command as its
   command line arguments.
 
-* nq doesn't rely on a daemon.
+* `nq` doesn't rely on a daemon.
 
 ## Copyright
 
-nq is in the public domain.
+`nq` is in the public domain.
 
 To the extent possible under law,
 Leah Neukirchen <leah@vuxu.org>
