@@ -25,9 +25,17 @@
 #define USE_INOTIFY
 #endif
 
+#if defined(__FreeBSD__) || defined(__APPLE__)
+#define USE_KEVENT
+#endif
+
 #ifdef USE_INOTIFY
 #include <sys/inotify.h>
 char ibuf[8192];
+#endif
+
+#ifdef USE_KEVENT
+#include <sys/event.h>
 #endif
 
 char buf[8192];
@@ -61,6 +69,10 @@ main(int argc, char *argv[])
 
 #ifdef USE_INOTIFY
 	int ifd, wd;
+#endif
+#ifdef USE_KEVENT
+	int kq, note;
+	struct kevent kev;
 #endif
 
 	close(0);
@@ -134,6 +146,11 @@ main(int argc, char *argv[])
 	if (ifd < 0)
 		exit(111);
 #endif
+#ifdef USE_KEVENT
+	kq = kqueue();
+	if (kq < 0)
+		exit(111);
+#endif
 
 	for (i = optind; i < argc; i++) {
 		loff = 0;
@@ -163,6 +180,20 @@ main(int argc, char *argv[])
 			exit(111);
 		}
 #endif
+#ifdef USE_KEVENT
+		note = NOTE_WRITE;
+#ifdef __APPLE__
+		note |= NOTE_FUNLOCK;
+#endif
+#ifdef __FreeBSD__
+		note |= NOTE_CLOSE_WRITE;
+#endif
+		EV_SET(&kev, fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, note, 0, NULL);
+		if (kevent(kq, &kev, 1, NULL, 0, NULL) < 0) {
+			perror("kevent");
+			exit(111);
+		}
+#endif
 
 		while (1) {
 			off = lseek(fd, 0, SEEK_END);
@@ -176,9 +207,11 @@ main(int argc, char *argv[])
 
 				if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
 				    errno == EWOULDBLOCK) {
-#ifdef USE_INOTIFY
+#if defined(USE_INOTIFY)
 					/* any inotify event is good */
 					read(ifd, ibuf, sizeof ibuf);
+#elif defined(USE_KEVENT)
+					kevent(kq, NULL, 0, &kev, 1, NULL);
 #else
 					/* poll for size change */
 					while (off == lseek(fd, 0, SEEK_END))
@@ -218,11 +251,18 @@ main(int argc, char *argv[])
 #ifdef USE_INOTIFY
 		inotify_rm_watch(ifd, wd);
 #endif
+#ifdef USE_KEVENT
+		EV_SET(&kev, fd, EVFILT_VNODE, EV_DELETE, 0, 0, NULL);
+		kevent(kq, &kev, 1, NULL, 0, NULL);
+#endif
 		close(fd);
 	}
 
 #ifdef USE_INOTIFY
 	close(ifd);
+#endif
+#ifdef USE_KEVENT
+	close(kq);
 #endif
 	return 0;
 }
