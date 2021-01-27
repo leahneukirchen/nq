@@ -125,6 +125,23 @@ You can also just copy the binaries into your `PATH`.
 You can use `make check` to run a simple test suite, if you have
 Perl's `prove` installed.
 
+## Comparison to `at` and `batch`
+
+* `at` runs jobs at a given time.
+  `batch` runs jobs "when system load levels permit".
+  nq runs jobs in sequence with no regard to the system's load average.
+
+* `at` and `batch` have 52 built-in queues: a-z and A-Z.
+  Any directory can be a queue for nq.
+
+* You can follow the output of an `nq` queue tail-style with `fq`.
+
+* The syntax is different: `at` and `batch` take whole scripts from
+  the standard input or a file; `nq` takes a single command as its
+  command line arguments.
+
+* nq doesn't rely on a daemon.
+
 ## Copyright
 
 nq is in the public domain.
