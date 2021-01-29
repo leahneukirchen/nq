@@ -1,11 +1,12 @@
 ALL=nq fq tq
 
-CFLAGS=-g -Wall -O2
+CC?=cc
+CFLAGS?=-g -Wall -O2
 
-DESTDIR=
-PREFIX=/usr/local
-BINDIR=$(PREFIX)/bin
-MANDIR=$(PREFIX)/share/man
+DESTDIR?=
+PREFIX?=/usr/local
+BINDIR?=$(PREFIX)/bin
+MANDIR?=$(PREFIX)/share/man
 
 all: $(ALL)
 
