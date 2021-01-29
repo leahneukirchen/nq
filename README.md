@@ -125,14 +125,16 @@ You can also just copy the binaries into your `PATH`.
 You can use `make check` to run a simple test suite, if you have
 Perl's `prove` installed.
 
-## Comparison to `at` and `batch`
+## Comparison to `at`, `batch` and `task-spooler`
 
 * `at` runs jobs at a given time.
   `batch` runs jobs "when system load levels permit".
-  `nq` runs jobs in sequence with no regard to the system's load average.
+  `nq` and [`task-spooler`](https://vicerveza.homeunix.net/~viric/soft/ts/)
+  run jobs in sequence with no regard to the system's load average.
 
 * `at` and `batch` have 52 built-in queues: a-z and A-Z.
   Any directory can be a queue for `nq`.
+  `task-spooler` can have different queues for different terminals.
 
 * You can follow the output of an `nq` queue tail-style with `fq`.
 
@@ -140,7 +142,10 @@ Perl's `prove` installed.
   the standard input or a file; `nq` takes a single command as its
   command line arguments.
 
-* `nq` doesn't rely on a daemon.
+* `nq` doesn't rely on a daemon and relies on a directory to manager the queue.
+  `task-spooler` automatically launches a daemon to manage a queue.
+
+* `task-spooler` can set a maximum number of simultaneous jobs.
 
 ## Copyright
 
