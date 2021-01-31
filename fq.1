@@ -1,4 +1,4 @@
-.Dd August 25, 2015
+.Dd January 31, 2021
 .Dt FQ 1
 .Os
 .Sh NAME
@@ -49,6 +49,9 @@ Directory where lock files/job output resides, see
 On Linux,
 .Xr inotify 7
 is used to monitor job output.
+On FreeBSD and macOS,
+.Xr kqueue 2
+is used.
 On other operating systems, polling is used.
 .Sh SEE ALSO
 .Xr nq 1 ,
