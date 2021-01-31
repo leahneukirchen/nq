@@ -142,7 +142,7 @@ Perl's `prove` installed.
   the standard input or a file; `nq` takes a single command as its
   command line arguments.
 
-* `nq` doesn't rely on a daemon and relies on a directory to manager the queue.
+* `nq` doesn't rely on a daemon and relies on a directory to manage the queue.
   `task-spooler` automatically launches a daemon to manage a queue.
 
 * `task-spooler` can set a maximum number of simultaneous jobs.
