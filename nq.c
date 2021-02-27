@@ -110,7 +110,7 @@ main(int argc, char *argv[])
 	int dirfd = 0, lockfd = 0;
 	int opt = 0, cflag = 0, qflag = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
-	char lockfile[64];
+	char lockfile[64], newestlocked[64];
 	pid_t child;
 	struct timeval started;
 	struct dirent *ent;
@@ -303,31 +303,40 @@ wait:
 		}
 
 again:
+		*newestlocked = 0;
+
 		while ((ent = readdir(dir))) {
-			/* wait for all ,* files.  */
+			/* wait for all older ,* files than ours.  */
 
-			if (ent->d_name[0] == ',' &&
-			    strcmp(ent->d_name, lockfile+1) < 0) {
-				int fd;
+			if (!(ent->d_name[0] == ',' &&
+			    strcmp(ent->d_name, lockfile+1) < 0))
+				continue;
 
-				fd = openat(dirfd, ent->d_name, O_RDWR);
-				if (fd < 0)
-					continue;
+			int fd = openat(dirfd, ent->d_name, O_RDWR);
+			if (fd < 0)
+				continue;
 
-				if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
-				    errno == EWOULDBLOCK) {
-					if (tflag)
-						exit(1);
-					flock(fd, LOCK_EX);   /* sit it out.  */
-
-					close(fd);
-					rewinddir(dir);
-					goto again;
-				}
-
+			if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
+			    errno == EWOULDBLOCK) {
+				if (tflag)
+					exit(1);
+				if (strcmp(ent->d_name, newestlocked) > 0)
+					strcpy(newestlocked, ent->d_name);
+			} else {
 				fchmod(fd, 0600);
+			}
+
+			close(fd);
+		}
+
+		if (*newestlocked) {
+			int fd = openat(dirfd, newestlocked, O_RDWR);
+			if (fd >= 0) {
+				flock(fd, LOCK_EX);   /* sit it out.  */
 				close(fd);
 			}
+			rewinddir(dir);
+			goto again;
 		}
 
 		closedir(dir);          /* closes dirfd too.  */
