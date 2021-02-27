@@ -309,7 +309,8 @@ again:
 			/* wait for all older ,* files than ours.  */
 
 			if (!(ent->d_name[0] == ',' &&
-			    strcmp(ent->d_name, lockfile+1) < 0))
+			    strcmp(ent->d_name, lockfile+1) < 0 &&
+			    strlen(ent->d_name) < sizeof(newestlocked)))
 				continue;
 
 			int fd = openat(dirfd, ent->d_name, O_RDWR);
