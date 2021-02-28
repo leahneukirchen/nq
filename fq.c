@@ -43,7 +43,7 @@ char buf[8192];
 static int
 islocked(int fd)
 {
-	if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
+	if (flock(fd, LOCK_SH | LOCK_NB) == -1) {
 		return (errno == EWOULDBLOCK);
 	} else {
 		flock(fd, LOCK_UN);
@@ -205,7 +205,7 @@ main(int argc, char *argv[])
 				if (nflag && islocked(fd))
 					break;
 
-				if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
+				if (flock(fd, LOCK_SH | LOCK_NB) == -1 &&
 				    errno == EWOULDBLOCK) {
 #if defined(USE_INOTIFY)
 					/* any inotify event is good */
