@@ -162,8 +162,10 @@ main(int argc, char *argv[])
 
 		/* skip not running jobs, unless -a was passed, or we did not
 		 * output anything yet and are at the last argument.  */
-		if (!aflag && !islocked(fd) && (didsth || i != argc - 1))
+		if (!aflag && !islocked(fd) && (didsth || i != argc - 1)) {
+			close(fd);
 			continue;
+		}
 
 		write(1, "==> ", 4);
 		write(1, argv[i], strlen(argv[i]));
