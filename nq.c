@@ -285,11 +285,11 @@ wait:
 			if (fd < 0)
 				continue;
 
-			if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
+			if (flock(fd, LOCK_SH | LOCK_NB) == -1 &&
 			    errno == EWOULDBLOCK) {
 				if (tflag)
 					exit(1);
-				flock(fd, LOCK_EX);   /* sit it out.  */
+				flock(fd, LOCK_SH);   /* sit it out.  */
 			}
 
 			fchmod(fd, 0600);
@@ -317,7 +317,7 @@ again:
 			if (fd < 0)
 				continue;
 
-			if (flock(fd, LOCK_EX | LOCK_NB) == -1 &&
+			if (flock(fd, LOCK_SH | LOCK_NB) == -1 &&
 			    errno == EWOULDBLOCK) {
 				if (tflag)
 					exit(1);
@@ -333,7 +333,7 @@ again:
 		if (*newestlocked) {
 			int fd = openat(dirfd, newestlocked, O_RDWR);
 			if (fd >= 0) {
-				flock(fd, LOCK_EX);   /* sit it out.  */
+				flock(fd, LOCK_SH);   /* sit it out.  */
 				close(fd);
 			}
 			rewinddir(dir);
