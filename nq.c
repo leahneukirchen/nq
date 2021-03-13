@@ -44,6 +44,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifndef O_DIRECTORY
+#define O_DIRECTORY 0
+#endif
+
 #ifdef NEED_DPRINTF
 #include <stdarg.h>
 static int
@@ -157,11 +161,7 @@ usage:
 		}
 	}
 
-#ifdef O_DIRECTORY
 	dirfd = open(path, O_RDONLY | O_DIRECTORY);
-#else
-	dirfd = open(path, O_RDONLY);
-#endif
 	if (dirfd < 0) {
 		perror("dir open");
 		exit(111);
@@ -176,11 +176,7 @@ usage:
 			}
 		}
 
-#ifdef O_DIRECTORY
 		donedirfd = open(donepath, O_RDONLY | O_DIRECTORY);
-#else
-		donedirfd = open(donepath, O_RDONLY);
-#endif
 		if (donedirfd < 0) {
 			perror("dir open");
 			exit(111);
