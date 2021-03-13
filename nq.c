@@ -107,7 +107,7 @@ int
 main(int argc, char *argv[])
 {
 	int64_t ms;
-	int dirfd = 0, lockfd = 0;
+	int dirfd = 0, donedirfd = 0, lockfd = 0;
 	int opt = 0, cflag = 0, qflag = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
 	char lockfile[64], newestlocked[64];
@@ -152,7 +152,7 @@ usage:
 
 	if (mkdir(path, 0777) < 0) {
 		if (errno != EEXIST) {
-			perror("mkdir");
+			perror("mkdir $NQDIR");
 			exit(111);
 		}
 	}
@@ -165,6 +165,26 @@ usage:
 	if (dirfd < 0) {
 		perror("dir open");
 		exit(111);
+	}
+
+	char *donepath = getenv("NQDONEDIR");
+	if (donepath) {
+		if (mkdir(path, 0777) < 0) {
+			if (errno != EEXIST) {
+				perror("mkdir $NQDONEDIR");
+				exit(111);
+			}
+		}
+
+#ifdef O_DIRECTORY
+		donedirfd = open(donepath, O_RDONLY | O_DIRECTORY);
+#else
+		donedirfd = open(donepath, O_RDONLY);
+#endif
+		if (donedirfd < 0) {
+			perror("dir open");
+			exit(111);
+		}
 	}
 
 	if (tflag || wflag) {
@@ -229,8 +249,14 @@ usage:
 		if (WIFEXITED(status)) {
 			dprintf(lockfd, "\n[exited with status %d.]\n",
 			    WEXITSTATUS(status));
-			if (cflag && WEXITSTATUS(status) == 0)
-				unlinkat(dirfd, lockfile, 0);
+			if (WEXITSTATUS(status) == 0) {
+				if (cflag)
+					unlinkat(dirfd, lockfile, 0);
+				else if (donepath)
+					renameat(dirfd, lockfile,
+					    donedirfd, lockfile);
+				/* errors above are ignored */
+			}
 		} else {
 			dprintf(lockfd, "\n[killed by signal %d.]\n",
 			    WTERMSIG(status));
