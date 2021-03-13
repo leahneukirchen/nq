@@ -107,7 +107,7 @@ int
 main(int argc, char *argv[])
 {
 	int64_t ms;
-	int dirfd = 0, donedirfd = 0, lockfd = 0;
+	int dirfd = -1, donedirfd = -1, lockfd = -1;
 	int opt = 0, cflag = 0, qflag = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
 	char lockfile[64], newestlocked[64];
