@@ -1,4 +1,4 @@
-.Dd August 25, 2015
+.Dd March 13, 2021
 .Dt NQ 1
 .Os
 .Sh NAME
@@ -70,7 +70,7 @@ wait in the foreground until
 listed job ids are done.
 .El
 .Sh ENVIRONMENT
-.Bl -hang -width Ds
+.Bl -hang -width "NQDONEDIR"
 .It Ev NQDIR
 Directory where lock files/job output resides.
 Each
@@ -81,6 +81,18 @@ The current working directory is used when
 is unset.
 .Ev NQDIR
 is created if needed.
+.It Ev NQDONEDIR
+When set, specifies a directory
+.Po
+must be on the same file system as
+.Ev NQDIR
+.Pc
+where lock files/job output is moved
+to after successful execution of the job.
+.Pp
+Ignored when
+.Fl c
+is used.
 .It Ev NQJOBID
 The job id of the currently running job,
 exposed to the job itself.
