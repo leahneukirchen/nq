@@ -1,3 +1,10 @@
+## 0.4
+
+* nq: now scales a lot better
+* nq: set $NQDONEDIR to move finished jobs there
+* fq: add kevent/kqueue support
+* Bugfixes
+
 ## 0.3.1 (2018-03-07)
 
 * Fix build on FreeBSD, OpenBSD and macOS.
