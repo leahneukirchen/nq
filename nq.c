@@ -169,7 +169,7 @@ usage:
 
 	char *donepath = getenv("NQDONEDIR");
 	if (donepath) {
-		if (mkdir(path, 0777) < 0) {
+		if (mkdir(donepath, 0777) < 0) {
 			if (errno != EEXIST) {
 				perror("mkdir $NQDONEDIR");
 				exit(111);
