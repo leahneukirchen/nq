@@ -313,9 +313,9 @@ wait:
 			int fd;
 
 			if (strchr(argv[i], '/'))
-				fd = open(argv[i], O_RDWR);
+				fd = open(argv[i], O_RDONLY);
 			else
-				fd = openat(dirfd, argv[i], O_RDWR);
+				fd = openat(dirfd, argv[i], O_RDONLY);
 			if (fd < 0)
 				continue;
 
@@ -347,7 +347,7 @@ again:
 			    strlen(ent->d_name) < sizeof(newestlocked)))
 				continue;
 
-			int fd = openat(dirfd, ent->d_name, O_RDWR);
+			int fd = openat(dirfd, ent->d_name, O_RDONLY);
 			if (fd < 0)
 				continue;
 
@@ -365,7 +365,7 @@ again:
 		}
 
 		if (*newestlocked) {
-			int fd = openat(dirfd, newestlocked, O_RDWR);
+			int fd = openat(dirfd, newestlocked, O_RDONLY);
 			if (fd >= 0) {
 				flock(fd, LOCK_SH);   /* sit it out.  */
 				close(fd);
