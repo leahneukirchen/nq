@@ -280,7 +280,7 @@ usage:
 	snprintf(lockfile, sizeof lockfile,
 	    ".,%011" PRIx64 ".%d", ms, getpid());
 	lockfd = openat(dirfd, lockfile,
-	    O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
+	    O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0666);
 	if (lockfd < 0) {
 		perror("open");
 		exit(222);
