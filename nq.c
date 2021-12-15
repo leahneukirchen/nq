@@ -107,6 +107,18 @@ write_execline(int fd, int argc, char *argv[])
 	}
 }
 
+static void
+setx(int fd, int executable)
+{
+	struct stat st;
+	fstat(fd, &st);
+	if (executable)
+		st.st_mode |= 0100;
+	else
+		st.st_mode &= ~0100;
+	fchmod(fd, st.st_mode);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -241,7 +253,7 @@ usage:
 			exit(222);
 		}
 
-		fchmod(lockfd, 0600);
+		setx(lockfd, 0);
 		if (WIFEXITED(status)) {
 			dprintf(lockfd, "\n[exited with status %d.]\n",
 			    WEXITSTATUS(status));
@@ -314,7 +326,7 @@ wait:
 				flock(fd, LOCK_SH);   /* sit it out.  */
 			}
 
-			fchmod(fd, 0600);
+			setx(fd, 0);
 			close(fd);
 		}
 	} else {
@@ -346,7 +358,7 @@ again:
 				if (strcmp(ent->d_name, newestlocked) > 0)
 					strcpy(newestlocked, ent->d_name);
 			} else {
-				fchmod(fd, 0600);
+				setx(fd, 0);
 			}
 
 			close(fd);
@@ -371,7 +383,7 @@ again:
 	/* ready to run.  */
 
 	swrite(lockfd, "\n\n");
-	fchmod(lockfd, 0700);
+	setx(lockfd, 1);
 
 	close(lockfd);
 
