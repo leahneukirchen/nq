@@ -1,4 +1,15 @@
-## 0.4
+## 0.5 (unreleased)
+
+* **Notable change:** nq now creates files with permissions 0666 and
+  subject to your umask (like most programs that create new files).
+  If your queue needs to remain secret, prohibit access to the whole
+  directory.
+* Support for nq in a multi-user environment: having read permission
+  for queued tasks in the directory is enough to wait for them.
+* Makefile: support INSTALL variable.
+* Bugfix: create $NQDONEDIR properly
+
+## 0.4 (2021-03-15)
 
 * nq: now scales a lot better
 * nq: set $NQDONEDIR to move finished jobs there
