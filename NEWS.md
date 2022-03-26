@@ -1,4 +1,4 @@
-## 0.5 (unreleased)
+## 0.5 (2022-03-26)
 
 * **Notable change:** nq now creates files with permissions 0666 and
   subject to your umask (like most programs that create new files).
