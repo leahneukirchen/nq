@@ -71,6 +71,7 @@ listed job ids are done.
 .El
 .Sh ENVIRONMENT
 .Bl -hang -width "NQDONEDIR"
+.Bl -hang -width "NQFAILDIR"
 .It Ev NQDIR
 Directory where lock files/job output resides.
 Each
@@ -93,6 +94,14 @@ to after successful execution of the job.
 Ignored when
 .Fl c
 is used.
+.It Ev NQFAILDIR
+When set, specifies a directory
+.Po
+must be on the same file system as
+.Ev NQDIR
+.Pc
+where lock files/job output is moved
+to after unsuccessful execution of the job.
 .It Ev NQJOBID
 The job id of the currently running job,
 exposed to the job itself.

@@ -123,7 +123,7 @@ int
 main(int argc, char *argv[])
 {
 	int64_t ms;
-	int dirfd = -1, donedirfd = -1, lockfd = -1;
+	int dirfd = -1, donedirfd = -1, faildirfd = -1, lockfd = -1;
 	int opt = 0, cflag = 0, qflag = 0, tflag = 0, wflag = 0;
 	int pipefd[2];
 	char lockfile[64], newestlocked[64];
@@ -190,6 +190,22 @@ usage:
 
 		donedirfd = open(donepath, O_RDONLY | O_DIRECTORY);
 		if (donedirfd < 0) {
+			perror("dir open");
+			exit(111);
+		}
+	}
+
+	char *failpath = getenv("NQFAILDIR");
+	if (failpath) {
+		if (mkdir(failpath, 0777) < 0) {
+			if (errno != EEXIST) {
+				perror("mkdir $NQFAILDIR");
+				exit(111);
+			}
+		}
+
+		faildirfd = open(failpath, O_RDONLY | O_DIRECTORY);
+		if (faildirfd < 0) {
 			perror("dir open");
 			exit(111);
 		}
@@ -263,6 +279,10 @@ usage:
 				else if (donepath)
 					renameat(dirfd, lockfile,
 					    donedirfd, lockfile);
+			}
+			if (WEXITSTATUS(status) != 0) {
+				if (failpath)
+					renameat(dirfd, lockfile, faildirfd, lockfile);
 				/* errors above are ignored */
 			}
 		} else {
