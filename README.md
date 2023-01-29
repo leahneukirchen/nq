@@ -9,10 +9,10 @@ provides a working flock(2).  Tested on Linux 2.6.37, Linux 4.1,
 OpenBSD 5.7, FreeBSD 10.1, NetBSD 7.0.2, Mac OS X 10.3 and
 SmartOS joyent_20160304T005100Z.
 
-The intended purpose is ad-hoc queuing of command lines (e.g. for
+The intended purpose is ad-hoc queuing of command lines (e.g., for
 building several targets of a Makefile, downloading multiple files one
 at a time, running benchmarks in several configurations, or simply as
-a glorified `nohup`), but as any good Unix tool, it can be abused for
+a glorified `nohup`). But as any good Unix tool, it can be abused for
 whatever you like.
 
 Job order is enforced by a timestamp `nq` gets immediately when
@@ -22,19 +22,19 @@ required.  Polling is not used.  Exclusive execution is maintained
 strictly.
 
 Enforcing job order works like this:
-- every job has a flock(2)ed output file ala `,TIMESTAMP.PID`
+- every job has a flock(2)ed output file, ala `,TIMESTAMP.PID`
 - every job starts only after all earlier flock(2)ed files are unlocked
 - Why flock(2)? Because it locks the file handle, which is shared
   across exec(2) with the child process (the actual job), and it will
   unlock when the file is closed (usually when the job terminates).
 
-You enqueue (get it?) new jobs using `nq CMDLINE...`.  The job id is
+You enqueue (get it?) new jobs using `nq CMDLINE...`.  The job ID is
 output (unless suppressed using `-q`) and `nq` detaches immediately,
 running the job in the background.  STDOUT and STDERR are redirected
 into the log file.
 
 `nq` tries hard (but does not guarantee) to ensure the log file of the
-currently running job has +x bit set.  Thus you can use `ls -F` to get
+currently running job has `+x` bit set.  Thus you can use `ls -F` to get
 a quick overview of the state of your queue.
 
 The "file extension" of the log file is actually the PID, so you can
@@ -42,13 +42,13 @@ kill jobs easily.  Before the job is started, it is the PID of `nq`,
 so you can cancel a queued job by killing it as well.
 
 Due to the initial `exec` line in the log files, you can resubmit a
-job by executing it as a shell command file, i.e. running `sh $jobid`.
+job by executing it as a shell command file (i.e. running `sh $jobid`).
 
 You can wait for jobs to finish using `nq -w`, possibly listing job
-ids you want to wait for; the default is all of them.  Likewise, you
+IDs you want to wait for; the default is all of them.  Likewise, you
 can test if there are jobs which need to be waited upon using `-t`.
 
-By default, job ids are per-directory, but you can set `$NQDIR` to put
+By default, job IDs are per-directory, but you can set `$NQDIR` to put
 them elsewhere.  Creating `nq` wrappers setting `$NQDIR` to provide
 different queues for different purposes is encouraged.
 
@@ -77,9 +77,9 @@ Simple download queue, accessible from multiple terminals:
 	% qwait
 	... wait for all downloads to finish ...
 
-As nohup replacement (The benchmark will run in background, every run
-gets a different output file, and the command line you ran is logged
-too.):
+As `nohup` replacement (The benchmark will run in background, every run
+gets a different output file, and the command line you ran is logged,
+too!):
 
 	% ssh remote
 	remote% nq ./run-benchmark
@@ -103,14 +103,14 @@ too.):
 
 Two helper programs are provided:
 
-`fq` outputs the log of the currently running jobs, exiting when the
+**`fq`** outputs the log of the currently running jobs, exiting when the
 jobs are done.  If no job is running, the output of the last job is
 shown.  `fq -a` shows the output of all jobs, `fq -q` only shows one
 line per job.  `fq` uses `inotify` on Linux and falls back to polling
 for size change else.  (`fq.sh` is a similar tool, not quite as robust,
 implemented as shell-script calling `tail`.)
 
-`tq` wraps `nq` and displays the `fq` output in a new tmux or screen window.
+**`tq`** wraps `nq` and displays the `fq` output in a new `tmux` or screen window.
 
 (A pure shell implementation of `nq` is provided as `nq.sh`.  It needs
 `flock` from util-linux, and only has a timer resolution of 1s.
@@ -125,7 +125,7 @@ You can also just copy the binaries into your `PATH`.
 You can use `make check` to run a simple test suite, if you have
 Perl's `prove` installed.
 
-## Comparison to `at`, `batch` and `task-spooler`
+## Comparison to `at`, `batch`, and `task-spooler`
 
 * `at` runs jobs at a given time.
   `batch` runs jobs "when system load levels permit".
@@ -142,7 +142,7 @@ Perl's `prove` installed.
   the standard input or a file; `nq` takes a single command as its
   command line arguments.
 
-* `nq` doesn't rely on a daemon and relies on a directory to manage the queue.
+* `nq` doesn't rely on a daemon, and uses a directory to manage the queue.
   `task-spooler` automatically launches a daemon to manage a queue.
 
 * `task-spooler` can set a maximum number of simultaneous jobs.
