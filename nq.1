@@ -71,7 +71,6 @@ listed job ids are done.
 .El
 .Sh ENVIRONMENT
 .Bl -hang -width "NQDONEDIR"
-.Bl -hang -width "NQFAILDIR"
 .It Ev NQDIR
 Directory where lock files/job output resides.
 Each
@@ -115,7 +114,7 @@ expects to control all files in
 which start with
 .Dq Li \&,
 or
-.Dq Li \&., .
+.Dq Li ., .
 These files are created according to the following scheme:
 .Pp
 .Dl ,hexadecimal-time-stamp.pid
