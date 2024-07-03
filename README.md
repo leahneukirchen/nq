@@ -62,7 +62,7 @@ Build targets `clean`, `depends`, `all`, without occupying the terminal:
 	% nq make clean
 	% nq make depends
 	% nq make all
-	% fq
+	% nqtail
 	... look at output, can interrupt with C-c any time
 	without stopping the build ...
 
@@ -70,7 +70,7 @@ Simple download queue, accessible from multiple terminals:
 
 	% mkdir -p /tmp/downloads
 	% alias qget='NQDIR=/tmp/downloads nq wget'
-	% alias qwait='NQDIR=/tmp/downloads fq -q'
+	% alias qwait='NQDIR=/tmp/downloads nqtail -q'
 	window1% qget http://mymirror/big1.iso
 	window2% qget http://mymirror/big2.iso
 	window3% qget http://mymirror/big3.iso
@@ -86,8 +86,8 @@ too!):
 	,14f6f3034f8.17035
 	remote% ^D
 	% ssh remote
-	remote% fq
-	... see output, fq exits when job finished ...
+	remote% nqtail
+	... see output, nqtail exits when job finished ...
 
 ## Assumptions
 
@@ -103,14 +103,16 @@ too!):
 
 Two helper programs are provided:
 
-**`fq`** outputs the log of the currently running jobs, exiting when the
-jobs are done.  If no job is running, the output of the last job is
-shown.  `fq -a` shows the output of all jobs, `fq -q` only shows one
-line per job.  `fq` uses `inotify` on Linux and falls back to polling
-for size change else.  (`fq.sh` is a similar tool, not quite as robust,
-implemented as shell-script calling `tail`.)
+**`nqtail`** outputs the log of the currently running jobs, exiting
+when the jobs are done.  If no job is running, the output of the last
+job is shown.  `nqtail -a` shows the output of all jobs, `nqtail -q`
+only shows one line per job.  `nqtail` uses `inotify` on Linux and
+falls back to polling for size change else.  (`nqtail.sh` is a similar
+tool, not quite as robust, implemented as shell-script calling
+`tail`.)
 
-**`tq`** wraps `nq` and displays the `fq` output in a new `tmux` or screen window.
+**`nqterm`** wraps `nq` and displays the `nqtail` output in a new
+`tmux` or screen window.
 
 (A pure shell implementation of `nq` is provided as `nq.sh`.  It needs
 `flock` from util-linux, and only has a timer resolution of 1s.
@@ -136,7 +138,7 @@ Perl's `prove` installed.
   Any directory can be a queue for `nq`.
   `task-spooler` can have different queues for different terminals.
 
-* You can follow the output of an `nq` queue tail-style with `fq`.
+* You can follow the output of an `nq` queue tail-style with `nqtail`.
 
 * The syntax is different: `at` and `batch` take whole scripts from
   the standard input or a file; `nq` takes a single command as its

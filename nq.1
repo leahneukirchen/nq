@@ -1,4 +1,4 @@
-.Dd March 13, 2021
+.Dd July 3, 2024
 .Dt NQ 1
 .Os
 .Sh NAME
@@ -47,7 +47,7 @@ and
 detaches from the terminal immediately,
 running the job in the background.
 Standard output and standard error are redirected into the job id file.
-.Xr fq 1
+.Xr nqtail 1
 can be used to conveniently watch the log files.
 .Pp
 The options are as follows:
@@ -139,7 +139,7 @@ without occupying the terminal:
 % nq make clean
 % nq make depends
 % nq make all
-% fq
+% nqtail
 \&... look at output, can interrupt with C-c any time
 without stopping the build ...
 .Ed
@@ -147,7 +147,7 @@ without stopping the build ...
 Simple download queue, accessible from multiple terminals:
 .Bd -literal -offset indent
 % alias qget='NQDIR=/tmp/downloads nq wget'
-% alias qwait='NQDIR=/tmp/downloads fq -q'
+% alias qwait='NQDIR=/tmp/downloads nqtail -q'
 window1% qget http://mymirror/big1.iso
 window2% qget http://mymirror/big2.iso
 window3% qget http://mymirror/big3.iso
@@ -167,8 +167,8 @@ remote% nq ./run-benchmark
 ,14f6f3034f8.17035
 remote% ^D
 % ssh remote
-remote% fq
-\&... see output, fq exits when job finished ...
+remote% nqtail
+\&... see output, nqtail exits when job finished ...
 .Ed
 .Sh TRICKS
 The "file extension" of the log file is actually the PID of the job.
@@ -238,8 +238,8 @@ into
 .Pa \&. ) .
 .El
 .Sh SEE ALSO
-.Xr fq 1 ,
-.Xr tq 1 .
+.Xr nqtail 1 ,
+.Xr nqterm 1 .
 .Pp
 Alternatives to the
 .Nm

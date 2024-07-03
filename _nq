@@ -1,4 +1,4 @@
-#compdef nq tq fq
+#compdef nq nqtail nqterm
 
 _nq_job() {
 	compadd "$@" -- ${NQDIR:-.}/,*.*(:t)
@@ -6,7 +6,7 @@ _nq_job() {
 
 _nq() {
 	case "$service" in
-	fq)	_arguments -s -A : \
+	nqtail)	_arguments -s -A : \
 			'-q[show only one line per job]' \
 			'-a[output for all jobs]' \
 			'*::job:_nq_job'
@@ -17,7 +17,7 @@ _nq() {
 			'(-):command name: _command_names -e' \
 			'*::arguments:_normal'
 		;;
-	tq)	_arguments : \
+	nqterm)	_arguments : \
 			'(-):command name: _command_names -e' \
 			'*::arguments:_normal'
 		;;

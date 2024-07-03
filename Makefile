@@ -1,4 +1,4 @@
-ALL=nq fq tq
+ALL=nq nqtail nqterm
 
 CFLAGS=-g -Wall -O2
 
@@ -12,7 +12,7 @@ INSTALL=install
 all: $(ALL)
 
 clean: FRC
-	rm -f nq fq
+	rm -f nq nqtail
 
 check: FRC all
 	prove -v ./tests

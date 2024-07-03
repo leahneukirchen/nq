@@ -1,8 +1,8 @@
-.Dd August 25, 2015
-.Dt TQ 1
+.Dd July 3, 2024
+.Dt NQTERM 1
 .Os
 .Sh NAME
-.Nm tq
+.Nm nqterm
 .Nd job queue wrapper for tmux/screen
 .Sh SYNOPSIS
 .Nm
@@ -12,7 +12,7 @@
 is a tiny wrapper around the
 .Xr nq 1
 job queue which automatically spawns a corresponding
-.Xr fq 1
+.Xr nqtail 1
 watching process in a new
 .Xr tmux 1
 or
@@ -37,8 +37,8 @@ Directory where lock files/job output resides, see
 .Sh EXIT STATUS
 .Ex -std
 .Sh SEE ALSO
-.Xr fq 1 ,
 .Xr nq 1 ,
+.Xr nqtail 1 ,
 .Xr screen 1 ,
 .Xr tmux 1
 .Sh AUTHORS

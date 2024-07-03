@@ -1,3 +1,9 @@
+## 1.0 (2024-07-03)
+
+* **Incompatible change:** The fq utility has been renamed to nqtail.
+* **Incompatible change:** The tq utility has been renamed to nqterm.
+* nq: add support for a $NQFAILDIR
+
 ## 0.5 (2022-03-26)
 
 * **Notable change:** nq now creates files with permissions 0666 and

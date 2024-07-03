@@ -1,5 +1,5 @@
 /*
- * fq [FILES...] - follow output of nq jobs, quitting when they are done
+ * nqtail [FILES...] - follow output of nq jobs, quitting when they are done
  *
  * To the extent possible under law, Leah Neukirchen <leah@vuxu.org>
  * has waived all copyright and related or neighboring rights to this work.
@@ -89,7 +89,7 @@ main(int argc, char *argv[])
 			qflag = 1;
 			break;
 		default:
-			fputs("usage: fq [-anq] [JOBID...]\n", stderr);
+			fputs("usage: nqtail [-anq] [JOBID...]\n", stderr);
 			exit(1);
 		}
 	}

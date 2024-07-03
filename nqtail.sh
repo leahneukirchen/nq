@@ -1,5 +1,5 @@
 #!/bin/sh
-# fq - tail -F the queue outputs, quitting when the job finishes
+# nqtail - tail -F the queue outputs, quitting when the job finishes
 
 tailed=false
 for f in ${NQDIR:-.}/,*; do
