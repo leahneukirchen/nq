@@ -2,3 +2,7 @@
 nq
 nqtail
 ,*.*
+
+# The following directories are specific to macOS:
+nq.dSYM/
+nqtail.dSYM/
