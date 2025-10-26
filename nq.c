@@ -318,6 +318,15 @@ usage:
 
 	write_execline(lockfd, argc, argv);
 
+	/* reopen stdin as /dev/null if used interactively */
+	if (isatty(0)) {
+		int nullfd = open("/dev/null", O_RDONLY);
+		if (nullfd >= 0) {
+			dup2(nullfd, 0);
+			close(nullfd);
+		}
+	}
+
 	if (dup2(lockfd, 2) < 0 ||
 	    dup2(lockfd, 1) < 0) {
 		perror("dup2");
