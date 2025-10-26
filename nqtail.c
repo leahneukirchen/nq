@@ -138,7 +138,8 @@ main(int argc, char *argv[])
 			argc++;
 		}
 
-		qsort(argv, argc, sizeof (char *), alphabetic);
+		if (argv)
+			qsort(argv, argc, sizeof (char *), alphabetic);
 	}
 
 #ifdef USE_INOTIFY
